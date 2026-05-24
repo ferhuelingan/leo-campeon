@@ -2,90 +2,36 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
   <meta name="apple-mobile-web-app-title" content="Leo Campeón"/>
-  <meta name="mobile-web-app-capable" content="yes"/>
   <meta name="theme-color" content="#06B6D4"/>
   <title>Leo Campeón</title>
   <link rel="manifest" href="manifest.json"/>
-  <!-- Apple touch icons (generated via canvas below) -->
-  <link rel="apple-touch-icon" href="icon-192.png"/>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { height: 100%; background: #F0F4FF; }
-    #root { height: 100%; }
-    /* Prevent iOS bounce scroll */
-    body { overflow: hidden; position: fixed; width: 100%; }
-    #root { overflow-y: auto; -webkit-overflow-scrolling: touch; height: 100dvh; }
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;background:#F0F4FF}
+    body{overflow:hidden;position:fixed;width:100%}
+    #root{overflow-y:auto;-webkit-overflow-scrolling:touch;height:100dvh}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
 </head>
 <body>
-  <div id="root"></div>
-
-  <!-- Generate PWA icons dynamically so no image files needed -->
-  <canvas id="iconCanvas" style="display:none"></canvas>
-
-  <script>
-    // Generate and cache icons for PWA install
-    function makeIcon(size) {
-      const c = document.getElementById('iconCanvas');
-      c.width = size; c.height = size;
-      const ctx = c.getContext('2d');
-      // Background
-      const g = ctx.createLinearGradient(0, 0, size, size);
-      g.addColorStop(0, '#06B6D4');
-      g.addColorStop(1, '#8B5CF6');
-      ctx.fillStyle = g;
-      const r = size * 0.22;
-      ctx.beginPath();
-      ctx.moveTo(r, 0);
-      ctx.lineTo(size - r, 0);
-      ctx.quadraticCurveTo(size, 0, size, r);
-      ctx.lineTo(size, size - r);
-      ctx.quadraticCurveTo(size, size, size - r, size);
-      ctx.lineTo(r, size);
-      ctx.quadraticCurveTo(0, size, 0, size - r);
-      ctx.lineTo(0, r);
-      ctx.quadraticCurveTo(0, 0, r, 0);
-      ctx.fill();
-      // Emoji
-      ctx.font = `${size * 0.55}px serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText('📚', size / 2, size / 2 + size * 0.04);
-      return c.toDataURL('image/png');
-    }
-
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
-      });
-    }
-
-    // Dynamically set apple-touch-icon
-    window.addEventListener('load', () => {
-      try {
-        const url192 = makeIcon(192);
-        document.querySelector('link[rel="apple-touch-icon"]').href = url192;
-      } catch(e) {}
-    });
-  </script>
-
-  <!-- React + ReactDOM + Babel (standalone, no build step needed) -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <script type="text/babel" data-presets="react">
-import { useState, useEffect, useRef, useCallback } from "react";
-
+<div id="root"></div>
+<script>
+if('serviceWorker'in navigator)window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});
+var useState=React.useState,useEffect=React.useEffect,useRef=React.useRef,
+    useCallback=React.useCallback,useReducer=React.useReducer,
+    useMemo=React.useMemo,useContext=React.useContext;
+</script>
+<script>
 // ═══════════════════════════════════════════════════════════════════
 // TTS — Spanish Spain only
 // ═══════════════════════════════════════════════════════════════════
-const SPAIN_VOICES = ["conchita","monica","lucia","jorge","juan","elena","carlos","maria"];
+const SPAIN_VOICES = ["conchita", "monica", "lucia", "jorge", "juan", "elena", "carlos", "maria"];
 const Speech = {
   synth: typeof window !== "undefined" ? window.speechSynthesis : null,
   _voice: null,
@@ -95,287 +41,988 @@ const Speech = {
     const esES = all.filter(v => v.lang === "es-ES");
     for (const name of SPAIN_VOICES) {
       const v = esES.find(v => v.name.toLowerCase().includes(name));
-      if (v) { this._voice = v; return; }
+      if (v) {
+        this._voice = v;
+        return;
+      }
     }
     const branded = esES.find(v => /google|microsoft/i.test(v.name));
-    if (branded) { this._voice = branded; return; }
-    if (esES.length) { this._voice = esES[0]; return; }
+    if (branded) {
+      this._voice = branded;
+      return;
+    }
+    if (esES.length) {
+      this._voice = esES[0];
+      return;
+    }
     const anyEs = all.find(v => v.lang.startsWith("es"));
-    if (anyEs) { this._voice = anyEs; return; }
+    if (anyEs) {
+      this._voice = anyEs;
+      return;
+    }
     this._voice = all[0] || null;
   },
-  getVoice() { if (!this._voice) this.pickVoice(); return this._voice; },
-  speak(text, { rate=0.9, pitch=1.18, volume=1, onEnd, jitter=true } = {}) {
+  getVoice() {
+    if (!this._voice) this.pickVoice();
+    return this._voice;
+  },
+  speak(text, {
+    rate = 0.9,
+    pitch = 1.18,
+    volume = 1,
+    onEnd,
+    jitter = true
+  } = {}) {
     if (!this.synth) return;
     this.synth.cancel();
     const utt = new SpeechSynthesisUtterance(text);
-    utt.lang   = "es-ES";
+    utt.lang = "es-ES";
     utt.volume = volume;
-    utt.rate   = jitter ? rate  + (Math.random()*0.06-0.03) : rate;
-    utt.pitch  = jitter ? pitch + (Math.random()*0.10-0.05) : pitch;
+    utt.rate = jitter ? rate + (Math.random() * 0.06 - 0.03) : rate;
+    utt.pitch = jitter ? pitch + (Math.random() * 0.10 - 0.05) : pitch;
     const v = this.getVoice();
     if (v) utt.voice = v;
     utt.onend = () => onEnd?.();
     this.synth.speak(utt);
   },
-  cheer(text,opts)   { this.speak(text,{rate:1.05,pitch:1.38,jitter:true,...(opts||{})}); },
-  correct(text,opts) { this.speak(text,{rate:0.82,pitch:1.05,jitter:false,...(opts||{})}); },
-  stop() { this.synth?.cancel(); },
+  cheer(text, opts) {
+    this.speak(text, {
+      rate: 1.05,
+      pitch: 1.38,
+      jitter: true,
+      ...(opts || {})
+    });
+  },
+  correct(text, opts) {
+    this.speak(text, {
+      rate: 0.82,
+      pitch: 1.05,
+      jitter: false,
+      ...(opts || {})
+    });
+  },
+  stop() {
+    this.synth?.cancel();
+  }
 };
-
 function useTTS() {
-  const speak   = useCallback((t,o) => Speech.speak(t,o||{}),   []);
-  const cheer   = useCallback((t,o) => Speech.cheer(t,o||{}),   []);
-  const correct = useCallback((t,o) => Speech.correct(t,o||{}), []);
-  const stop    = useCallback(()    => Speech.stop(),            []);
-  return { speak, cheer, correct, stop };
+  const speak = useCallback((t, o) => Speech.speak(t, o || {}), []);
+  const cheer = useCallback((t, o) => Speech.cheer(t, o || {}), []);
+  const correct = useCallback((t, o) => Speech.correct(t, o || {}), []);
+  const stop = useCallback(() => Speech.stop(), []);
+  return {
+    speak,
+    cheer,
+    correct,
+    stop
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // THEME & FONTS
 // ═══════════════════════════════════════════════════════════════════
-const T = { bg:"#F0F4FF", card:"#FFFFFF", text:"#1E293B", muted:"#64748B", border:"#E2E8F0" };
-const FONT_PRINT  = "'Nunito','Arial Rounded MT Bold',Arial,sans-serif";
+const T = {
+  bg: "#F0F4FF",
+  card: "#FFFFFF",
+  text: "#1E293B",
+  muted: "#64748B",
+  border: "#E2E8F0"
+};
+const FONT_PRINT = "'Nunito','Arial Rounded MT Bold',Arial,sans-serif";
 const FONT_SCRIPT = "'Playwrite ES',cursive";
 
 // ═══════════════════════════════════════════════════════════════════
 // CURRICULUM — all levels with corrected data
 // ═══════════════════════════════════════════════════════════════════
-const LEVELS = [
-  {
-    id:1, title:"Mis primeras sílabas", subtitle:"M · P · L · S · T · D · N",
-    icon:"🌱", color:"#06B6D4", type:"syllables",
-    syllables:["MA","ME","MI","MO","MU","PA","PE","PI","PO","PU",
-               "LA","LE","LI","LO","LU","SA","SE","SI","SO","SU",
-               "TA","TE","TI","TO","TU","DA","DE","DI","DO","DU",
-               "NA","NE","NI","NO","NU"],
-  },
-  {
-    id:2, title:"Mis primeras palabras", subtitle:"Palabras de dos sílabas",
-    icon:"📖", color:"#8B5CF6", type:"words",
-    words:[
-      {w:"MAPA", s1:"MA",s2:"PA",tts:"mapa", emoji:"🗺️",opts:["🗺️ mapa","🌙 luna","🎈 globo"],c:0},
-      {w:"MESA", s1:"ME",s2:"SA",tts:"mesa", emoji:"🍽️",opts:["🚗 coche","🍽️ mesa","🌸 flor"],c:1},
-      {w:"PALO", s1:"PA",s2:"LO",tts:"palo", emoji:"🪵",opts:["🪵 palo","🐸 rana","🍕 pizza"],c:0},
-      {w:"LUNA", s1:"LU",s2:"NA",tts:"luna", emoji:"🌙",opts:["🎪 circo","🎈 globo","🌙 luna"],c:2},
-      {w:"SOPA", s1:"SO",s2:"PA",tts:"sopa", emoji:"🍲",opts:["🍲 sopa","🚗 coche","🌊 mar"],c:0},
-      {w:"NIDO", s1:"NI",s2:"DO",tts:"nido", emoji:"🪺",opts:["🎵 música","🪺 nido","🍌 plátano"],c:1},
-      {w:"TELA", s1:"TE",s2:"LA",tts:"tela", emoji:"🧵",opts:["🦋 mariposa","🐬 delfín","🧵 tela"],c:2},
-      {w:"PILA", s1:"PI",s2:"LA",tts:"pila", emoji:"🔋",opts:["🔋 pila","🌺 rosa","🐴 caballo"],c:0},
-      {w:"DATO", s1:"DA",s2:"TO",tts:"dato", emoji:"📊",opts:["🍦 helado","📊 dato","🐙 pulpo"],c:1},
-      {w:"POLO", s1:"PO",s2:"LO",tts:"polo", emoji:"🏒",opts:["🧊 hielo","🎪 circo","🏒 polo"],c:2},
-      {w:"DEDO", s1:"DE",s2:"DO",tts:"dedo", emoji:"☝️",opts:["☝️ dedo","🌙 luna","🍎 manzana"],c:0},
-      {w:"MANO", s1:"MA",s2:"NO",tts:"mano", emoji:"🖐️",opts:["🌸 flor","🖐️ mano","🎵 nota"],c:1},
-      {w:"LUPA", s1:"LU",s2:"PA",tts:"lupa", emoji:"🔍",opts:["🌊 mar","🐦 pájaro","🔍 lupa"],c:2},
-      {w:"NUDO", s1:"NU",s2:"DO",tts:"nudo", emoji:"🪢",opts:["🪢 nudo","🍕 pizza","🎪 circo"],c:0},
-      {w:"PUMA", s1:"PU",s2:"MA",tts:"puma", emoji:"🐆",opts:["🎸 guitarra","🐆 puma","🍌 plátano"],c:1},
-    ],
-  },
-  {
-    id:3, title:"Palabras de tres sílabas", subtitle:"Camino, pelota, maleta…",
-    icon:"🔠", color:"#F59E0B", type:"words3",
-    words:[
-      {w:"MALETA", s1:"MA",s2:"LE",s3:"TA",tts:"maleta",emoji:"🧳",opts:["🧳 maleta","🌙 luna","🍎 manzana"],c:0},
-      {w:"PELOTA", s1:"PE",s2:"LO",s3:"TA",tts:"pelota",emoji:"⚽",opts:["🌸 flor","⚽ pelota","🎵 música"],c:1},
-      {w:"CAMINO", s1:"CA",s2:"MI",s3:"NO",tts:"camino",emoji:"🛤️",opts:["🌊 mar","🐦 pájaro","🛤️ camino"],c:2},
-      {w:"PALOMA", s1:"PA",s2:"LO",s3:"MA",tts:"paloma",emoji:"🕊️",opts:["🎸 guitarra","🕊️ paloma","🍌 plátano"],c:1},
-      {w:"TOMATE", s1:"TO",s2:"MA",s3:"TE",tts:"tomate",emoji:"🍅",opts:["🌺 rosa","🐬 delfín","🍅 tomate"],c:2},
-      {w:"MELENA", s1:"ME",s2:"LE",s3:"NA",tts:"melena",emoji:"💇",opts:["💇 melena","🦋 mariposa","🐴 caballo"],c:0},
-      {w:"SEMANA", s1:"SE",s2:"MA",s3:"NA",tts:"semana",emoji:"📅",opts:["🍦 helado","📅 semana","🐙 pulpo"],c:1},
-      {w:"PATATA", s1:"PA",s2:"TA",s3:"TA",tts:"patata",emoji:"🥔",opts:["🦁 león","🎀 lazo","🥔 patata"],c:2},
-      {w:"MEDALLA", s1:"ME",s2:"DA",s3:"LLA",tts:"medalla",emoji:"🥇",opts:["🌸 flor","🥇 medalla","🎵 nota"],c:1},
-      {w:"FAMILIA", s1:"FA",s2:"MI",s3:"LIA",tts:"familia",emoji:"👨‍👩‍👧",opts:["🌊 mar","🐦 pájaro","👨‍👩‍👧 familia"],c:2},
-      {w:"PANTERA", s1:"PAN",s2:"TE",s3:"RA",tts:"pantera",emoji:"🐆",opts:["🐆 pantera","🍕 pizza","🎪 circo"],c:0},
-    ],
-  },
-  {
-    id:4, title:"Nuevas letras", subtitle:"B · R · C · F · G · J · V",
-    icon:"🌿", color:"#10B981", type:"syllables",
-    syllables:["BA","BE","BI","BO","BU","RA","RE","RI","RO","RU",
-               "CA","CE","CI","CO","CU","FA","FE","FI","FO","FU",
-               "GA","GE","GI","GO","GU","JA","JE","JI","JO","JU",
-               "VA","VE","VI","VO","VU"],
-  },
-  {
-    id:5, title:"Más palabras", subtitle:"Boca, rana, gato…",
-    icon:"🔤", color:"#EC4899", type:"words",
-    words:[
-      {w:"BOCA", s1:"BO",s2:"CA",tts:"boca",emoji:"👄",opts:["👄 boca","🚀 cohete","🍎 manzana"],c:0},
-      {w:"ROPA", s1:"RO",s2:"PA",tts:"ropa",emoji:"👕",opts:["🌸 flor","👕 ropa","🎵 música"],c:1},
-      {w:"CAMA", s1:"CA",s2:"MA",tts:"cama",emoji:"🛏️",opts:["🌊 mar","🐦 pájaro","🛏️ cama"],c:2},
-      {w:"FOCA", s1:"FO",s2:"CA",tts:"foca",emoji:"🦭",opts:["🦭 foca","🍕 pizza","🎪 circo"],c:0},
-      {w:"GATO", s1:"GA",s2:"TO",tts:"gato",emoji:"🐱",opts:["🎸 guitarra","🐱 gato","🍌 plátano"],c:1},
-      {w:"BESO", s1:"BE",s2:"SO",tts:"beso",emoji:"💋",opts:["🌺 rosa","🐬 delfín","💋 beso"],c:2},
-      {w:"VASO", s1:"VA",s2:"SO",tts:"vaso",emoji:"🥛",opts:["🥛 vaso","🦋 mariposa","🐴 caballo"],c:0},
-      {w:"RANA", s1:"RA",s2:"NA",tts:"rana",emoji:"🐸",opts:["🍦 helado","🐸 rana","🐙 pulpo"],c:1},
-      {w:"FARO", s1:"FA",s2:"RO",tts:"faro",emoji:"🏮",opts:["🏮 faro","🌙 luna","🐟 pez"],c:0},
-      {w:"JUGO", s1:"JU",s2:"GO",tts:"jugo",emoji:"🧃",opts:["🧃 jugo","🎪 circo","🌸 flor"],c:0},
-      {w:"VELA", s1:"VE",s2:"LA",tts:"vela",emoji:"🕯️",opts:["🌊 mar","🕯️ vela","🐦 pájaro"],c:1},
-      {w:"CABO", s1:"CA",s2:"BO",tts:"cabo",emoji:"⛵",opts:["🦁 león","🎀 lazo","⛵ cabo"],c:2},
-    ],
-  },
-  {
-    id:6, title:"Más palabras largas", subtitle:"Barriga, regalo, cebolla…",
-    icon:"🔡", color:"#06B6D4", type:"words3",
-    words:[
-      {w:"BARRIGA", s1:"BA",s2:"RRI",s3:"GA",tts:"barriga",emoji:"🤰",opts:["🤰 barriga","🌙 luna","🍎 manzana"],c:0},
-      {w:"REGALO",  s1:"RE",s2:"GA", s3:"LO",tts:"regalo", emoji:"🎁",opts:["🌸 flor","🎁 regalo","🎵 música"],c:1},
-      {w:"CEBOLLA", s1:"CE",s2:"BO", s3:"LLA",tts:"cebolla",emoji:"🧅",opts:["🌊 mar","🐦 pájaro","🧅 cebolla"],c:2},
-      {w:"JIRAFA",  s1:"JI",s2:"RA", s3:"FA", tts:"jirafa", emoji:"🦒",opts:["🦒 jirafa","🍕 pizza","🎪 circo"],c:0},
-      {w:"BOTELLA", s1:"BO",s2:"TE", s3:"LLA",tts:"botella",emoji:"🍾",opts:["🌺 rosa","🐬 delfín","🍾 botella"],c:2},
-      {w:"CABEZA",  s1:"CA",s2:"BE", s3:"ZA", tts:"cabeza", emoji:"🗣️",opts:["🗣️ cabeza","🦋 mariposa","🐴 caballo"],c:0},
-      {w:"BUFANDA", s1:"BU",s2:"FAN",s3:"DA", tts:"bufanda",emoji:"🧣",opts:["🍦 helado","🧣 bufanda","🐙 pulpo"],c:1},
-      {w:"GAVILÁN", s1:"GA",s2:"VI", s3:"LÁN",tts:"gavilán",emoji:"🦅",opts:["🎸 guitarra","🦅 gavilán","🍌 plátano"],c:1},
-    ],
-  },
-  {
-    id:7, title:"Letras especiales", subtitle:"Ñ · Ch · Ll · Z · X · Y · H · Q",
-    icon:"⚡", color:"#EF4444", type:"syllables",
-    syllables:["ÑA","ÑE","ÑI","ÑO","ÑU","CHA","CHE","CHI","CHO","CHU",
-               "LLA","LLE","LLI","LLO","LLU","ZA","ZE","ZI","ZO","ZU",
-               "YA","YE","YO","YU","HA","HE","HI","HO","HU","QUE","QUI"],
-  },
-  {
-    id:8, title:"Palabras especiales", subtitle:"Niño, leche, llave…",
-    icon:"🔥", color:"#F97316", type:"words",
-    words:[
-      {w:"NIÑO",   s1:"NI", s2:"ÑO",  tts:"niño",  emoji:"👦",opts:["👦 niño","🌙 luna","🍎 manzana"],c:0},
-      {w:"LECHE",  s1:"LE", s2:"CHE", tts:"leche", emoji:"🥛",opts:["🌸 flor","🥛 leche","🎵 música"],c:1},
-      {w:"LLAVE",  s1:"LLA",s2:"VE",  tts:"llave", emoji:"🗝️",opts:["🌊 mar","🐦 pájaro","🗝️ llave"],c:2},
-      {w:"YEMA",   s1:"YE", s2:"MA",  tts:"yema",  emoji:"🥚",opts:["🎸 guitarra","🥚 yema","🍌 plátano"],c:1},
-      {w:"QUESO",  s1:"QUE",s2:"SO",  tts:"queso", emoji:"🧀",opts:["🌺 rosa","🐬 delfín","🧀 queso"],c:2},
-      {w:"HACHA",  s1:"HA", s2:"CHA", tts:"hacha", emoji:"🪓",opts:["🪓 hacha","🦋 mariposa","🐴 caballo"],c:0},
-      {w:"COCHE",  s1:"CO", s2:"CHE", tts:"coche", emoji:"🚗",opts:["🍦 helado","🚗 coche","🐙 pulpo"],c:1},
-    ],
-  },
-  {
-    id:9, title:"Palabras con Ñ y Ch", subtitle:"Zapato, muñeca, chapa…",
-    icon:"🌟", color:"#A855F7", type:"words3",
-    words:[
-      {w:"ZAPATO",  s1:"ZA",s2:"PA", s3:"TO",  tts:"zapato",  emoji:"👟",opts:["👟 zapato","🍕 pizza","🎪 circo"],c:0},
-      {w:"MUÑECA",  s1:"MU",s2:"ÑE", s3:"CA",  tts:"muñeca",  emoji:"🪆",opts:["🌸 flor","🪆 muñeca","🎵 música"],c:1},
-      {w:"CUCHARA", s1:"CU",s2:"CHA",s3:"RA",  tts:"cuchara", emoji:"🥄",opts:["🌊 mar","🐦 pájaro","🥄 cuchara"],c:2},
-      {w:"CHORIZO", s1:"CHO",s2:"RI",s3:"ZO",  tts:"chorizo", emoji:"🌭",opts:["🌭 chorizo","🍕 pizza","🎪 circo"],c:0},
-      {w:"VENTANA", s1:"VEN",s2:"TA",s3:"NA",  tts:"ventana", emoji:"🪟",opts:["🎸 guitarra","🪟 ventana","🍌 plátano"],c:1},
-      {w:"CABALLO", s1:"CA",s2:"BA", s3:"LLO", tts:"caballo", emoji:"🐴",opts:["🌺 rosa","🐬 delfín","🐴 caballo"],c:2},
-      {w:"GALLETA", s1:"GA",s2:"LLE",s3:"TA",  tts:"galleta", emoji:"🍪",opts:["🍪 galleta","🦋 mariposa","🐙 pulpo"],c:0},
-    ],
-  },
-  {
-    id:10, title:"Sílabas al revés", subtitle:"Al · En · Is · Un · Ar…",
-    icon:"🔄", color:"#6366F1", type:"syllables", isInverse:true,
-    syllables:["AL","EL","IL","OL","UL","AN","EN","IN","ON","UN",
-               "AR","ER","IR","OR","UR","AS","ES","IS","OS","US",
-               "AM","EM","IM","OM","UM","AP","EP","IP","OP","UP"],
-  },
-  {
-    id:11, title:"Palabras inversas", subtitle:"Arco, isla, alma…",
-    icon:"🧩", color:"#0EA5E9", type:"words",
-    words:[
-      {w:"ALMA",  s1:"AL",s2:"MA",tts:"alma",emoji:"💛",opts:["💛 alma","🚗 coche","🍎 manzana"],c:0},
-      {w:"ARCO",  s1:"AR",s2:"CO",tts:"arco",emoji:"🌈",opts:["🌸 flor","🌈 arco","🎵 música"],c:1},
-      {w:"ISLA",  s1:"IS",s2:"LA",tts:"isla",emoji:"🏝️",opts:["🌊 mar","🐦 pájaro","🏝️ isla"],c:2},
-      {w:"OLLA",  s1:"OL",s2:"LA",tts:"olla",emoji:"🍳",opts:["🍳 olla","🍕 pizza","🎪 circo"],c:0},
-      {w:"URNA",  s1:"UR",s2:"NA",tts:"urna",emoji:"🏺",opts:["🎸 guitarra","🏺 urna","🍌 plátano"],c:1},
-      {w:"ELFO",  s1:"EL",s2:"FO",tts:"elfo",emoji:"🧝",opts:["🌺 rosa","🐬 delfín","🧝 elfo"],c:2},
-    ],
-  },
-  {
-    id:12, title:"Sílabas trabadas", subtitle:"Bra · Cla · Pre · Glo · Tra…",
-    icon:"⚙️", color:"#EC4899", type:"syllables",
-    syllables:["BRA","BRE","BRI","BRO","BRU","CLA","CLE","CLI","CLO","CLU",
-               "PRA","PRE","PRI","PRO","PRU","GLA","GLE","GLI","GLO","GLU",
-               "TRA","TRE","TRI","TRO","TRU","FRA","FRE","FRI","FRO","FRU",
-               "CRA","CRE","CRI","CRO","CRU","DRA","DRE","DRI","DRO","DRU",
-               "GRA","GRE","GRI","GRO","GRU"],
-  },
-  {
-    id:13, title:"Palabras trabadas", subtitle:"Brazo, globo, tren…",
-    icon:"🎯", color:"#14B8A6", type:"words",
-    words:[
-      {w:"BRAZO", s1:"BRA",s2:"ZO", tts:"brazo",emoji:"💪",opts:["💪 brazo","🌙 luna","🐟 pez"],c:0},
-      {w:"CLAVO", s1:"CLA",s2:"VO", tts:"clavo",emoji:"🔩",opts:["🌸 flor","🔩 clavo","🎵 música"],c:1},
-      {w:"FRUTA", s1:"FRU",s2:"TA", tts:"fruta",emoji:"🍓",opts:["🌊 mar","🐦 pájaro","🍓 fruta"],c:2},
-      {w:"GLOBO", s1:"GLO",s2:"BO", tts:"globo",emoji:"🎈",opts:["🎈 globo","🍕 pizza","🎪 circo"],c:0},
-      {w:"DRAMA", s1:"DRA",s2:"MA", tts:"drama",emoji:"🎭",opts:["🌺 rosa","🐬 delfín","🎭 drama"],c:2},
-      {w:"GRANJA",s1:"GRAN",s2:"JA",tts:"granja",emoji:"🏡",opts:["🏡 granja","🦋 mariposa","🐴 caballo"],c:0},
-      {w:"TREN",  s1:"TREN",s2:"",  tts:"tren",  emoji:"🚂",opts:["🎸 guitarra","🚂 tren","🍌 plátano"],c:1,mono:true},
-    ],
-  },
-  {
-    id:14, title:"Leo frases", subtitle:"Frases cortas completas",
-    icon:"💬", color:"#84CC16", type:"phrases",
-    phrases:[
-      {phrase:"MI MAMÁ ME AMA",     tts:"mi mamá me ama",      words:["MI","MAMÁ","ME","AMA"],       emoji:"💗"},
-      {phrase:"EL GATO ES TRAVIESO",tts:"el gato es travieso", words:["EL","GATO","ES","TRAVIESO"],  emoji:"😼"},
-      {phrase:"LA LUNA SALE",       tts:"la luna sale",        words:["LA","LUNA","SALE"],           emoji:"🌙"},
-      {phrase:"MI PAPÁ COME SOPA",  tts:"mi papá come sopa",   words:["MI","PAPÁ","COME","SOPA"],    emoji:"🍲"},
-      {phrase:"LA RANA SALTA",      tts:"la rana salta",       words:["LA","RANA","SALTA"],          emoji:"🐸"},
-      {phrase:"EL TREN VA RÁPIDO",  tts:"el tren va rápido",   words:["EL","TREN","VA","RÁPIDO"],    emoji:"🚂"},
-    ],
-  },
-  {
-    id:15, title:"Leo y entiendo", subtitle:"Textos con preguntas",
-    icon:"📰", color:"#A855F7", type:"reading",
-    texts:[
-      {
-        title:"El gato y el ratón",emoji:"🐱",
-        tts:"El gato ve al ratón. El ratón corre muy rápido. El gato no lo pilla. El ratón es muy listo.",
-        text:"El gato ve al ratón.\nEl ratón corre muy rápido.\nEl gato no lo pilla.\nEl ratón es muy listo.",
-        questions:[
-          {q:"¿Qué ve el gato?",    tts:"¿Qué ve el gato?",   opts:["Un perro","Un ratón","Un pez"],  c:1},
-          {q:"¿Quién corre?",       tts:"¿Quién corre?",       opts:["El gato","El perro","El ratón"],c:2},
-          {q:"¿Es listo el ratón?", tts:"¿Es listo el ratón?", opts:["Sí, mucho","No","No sé"],       c:0},
-        ],
-      },
-      {
-        title:"Mi familia",emoji:"👨‍👩‍👦",
-        tts:"Mi mamá se llama Ana. Mi papá se llama Luis. Tenemos un perro. Se llama Tobi.",
-        text:"Mi mamá se llama Ana.\nMi papá se llama Luis.\nTenemos un perro.\nSe llama Tobi.",
-        questions:[
-          {q:"¿Cómo se llama la mamá?",  tts:"¿Cómo se llama la mamá?",  opts:["Lucía","Ana","María"],       c:1},
-          {q:"¿Tienen un gato?",          tts:"¿Tienen un gato?",           opts:["Sí","No, un perro","No sé"],c:1},
-          {q:"¿Cómo se llama el perro?",  tts:"¿Cómo se llama el perro?",  opts:["Tobi","Coco","Rex"],         c:0},
-        ],
-      },
-    ],
-  },
-  {
-    id:16, title:"Dictado: palabras", subtitle:"Escucho y escribo",
-    icon:"✏️", color:"#F43F5E", type:"dictation",
-    dictItems:[
-      {text:"MAPA",  tts:"mapa",  hint:"Sirve para encontrar caminos 🗺️"},
-      {text:"LUNA",  tts:"luna",  hint:"Brilla por la noche 🌙"},
-      {text:"SOPA",  tts:"sopa",  hint:"La comes caliente con cuchara 🍲"},
-      {text:"GATO",  tts:"gato",  hint:"Animal que hace miau 🐱"},
-      {text:"ROPA",  tts:"ropa",  hint:"Lo que te pones encima 👕"},
-      {text:"BRAZO", tts:"brazo", hint:"Lo usas para abrazar 💪"},
-      {text:"GLOBO", tts:"globo", hint:"Vuela lleno de aire 🎈"},
-      {text:"FRUTA", tts:"fruta", hint:"La manzana es una ___ 🍎"},
-      {text:"NIÑO",  tts:"niño",  hint:"Un chico pequeño 👦"},
-      {text:"QUESO", tts:"queso", hint:"Lo pones en el bocadillo 🧀"},
-    ],
-  },
-  {
-    id:17, title:"Dictado: frases", subtitle:"Escucho y escribo frases",
-    icon:"📝", color:"#7C3AED", type:"dictation",
-    dictItems:[
-      {text:"MI GATO ES MALO",   tts:"mi gato es malo",   hint:"Frase sobre un gato travieso 😾"},
-      {text:"LA LUNA SALE",      tts:"la luna sale",      hint:"Algo que pasa por la noche 🌙"},
-      {text:"EL TREN VA RAPIDO", tts:"el tren va rápido", hint:"Frase sobre un tren 🚂"},
-      {text:"MI MAMA ME AMA",    tts:"mi mamá me ama",    hint:"Frase de amor familiar 💗"},
-      {text:"LA RANA SALTA",     tts:"la rana salta",     hint:"Lo que hace la rana 🐸"},
-    ],
-  },
-];
+const LEVELS = [{
+  id: 1,
+  title: "Mis primeras sílabas",
+  subtitle: "M · P · L · S · T · D · N",
+  icon: "🌱",
+  color: "#06B6D4",
+  type: "syllables",
+  syllables: ["MA", "ME", "MI", "MO", "MU", "PA", "PE", "PI", "PO", "PU", "LA", "LE", "LI", "LO", "LU", "SA", "SE", "SI", "SO", "SU", "TA", "TE", "TI", "TO", "TU", "DA", "DE", "DI", "DO", "DU", "NA", "NE", "NI", "NO", "NU"]
+}, {
+  id: 2,
+  title: "Mis primeras palabras",
+  subtitle: "Palabras de dos sílabas",
+  icon: "📖",
+  color: "#8B5CF6",
+  type: "words",
+  words: [{
+    w: "MAPA",
+    s1: "MA",
+    s2: "PA",
+    tts: "mapa",
+    emoji: "🗺️",
+    opts: ["🗺️ mapa", "🌙 luna", "🎈 globo"],
+    c: 0
+  }, {
+    w: "MESA",
+    s1: "ME",
+    s2: "SA",
+    tts: "mesa",
+    emoji: "🍽️",
+    opts: ["🚗 coche", "🍽️ mesa", "🌸 flor"],
+    c: 1
+  }, {
+    w: "PALO",
+    s1: "PA",
+    s2: "LO",
+    tts: "palo",
+    emoji: "🪵",
+    opts: ["🪵 palo", "🐸 rana", "🍕 pizza"],
+    c: 0
+  }, {
+    w: "LUNA",
+    s1: "LU",
+    s2: "NA",
+    tts: "luna",
+    emoji: "🌙",
+    opts: ["🎪 circo", "🎈 globo", "🌙 luna"],
+    c: 2
+  }, {
+    w: "SOPA",
+    s1: "SO",
+    s2: "PA",
+    tts: "sopa",
+    emoji: "🍲",
+    opts: ["🍲 sopa", "🚗 coche", "🌊 mar"],
+    c: 0
+  }, {
+    w: "NIDO",
+    s1: "NI",
+    s2: "DO",
+    tts: "nido",
+    emoji: "🪺",
+    opts: ["🎵 música", "🪺 nido", "🍌 plátano"],
+    c: 1
+  }, {
+    w: "TELA",
+    s1: "TE",
+    s2: "LA",
+    tts: "tela",
+    emoji: "🧵",
+    opts: ["🦋 mariposa", "🐬 delfín", "🧵 tela"],
+    c: 2
+  }, {
+    w: "PILA",
+    s1: "PI",
+    s2: "LA",
+    tts: "pila",
+    emoji: "🔋",
+    opts: ["🔋 pila", "🌺 rosa", "🐴 caballo"],
+    c: 0
+  }, {
+    w: "DATO",
+    s1: "DA",
+    s2: "TO",
+    tts: "dato",
+    emoji: "📊",
+    opts: ["🍦 helado", "📊 dato", "🐙 pulpo"],
+    c: 1
+  }, {
+    w: "POLO",
+    s1: "PO",
+    s2: "LO",
+    tts: "polo",
+    emoji: "🏒",
+    opts: ["🧊 hielo", "🎪 circo", "🏒 polo"],
+    c: 2
+  }, {
+    w: "DEDO",
+    s1: "DE",
+    s2: "DO",
+    tts: "dedo",
+    emoji: "☝️",
+    opts: ["☝️ dedo", "🌙 luna", "🍎 manzana"],
+    c: 0
+  }, {
+    w: "MANO",
+    s1: "MA",
+    s2: "NO",
+    tts: "mano",
+    emoji: "🖐️",
+    opts: ["🌸 flor", "🖐️ mano", "🎵 nota"],
+    c: 1
+  }, {
+    w: "LUPA",
+    s1: "LU",
+    s2: "PA",
+    tts: "lupa",
+    emoji: "🔍",
+    opts: ["🌊 mar", "🐦 pájaro", "🔍 lupa"],
+    c: 2
+  }, {
+    w: "NUDO",
+    s1: "NU",
+    s2: "DO",
+    tts: "nudo",
+    emoji: "🪢",
+    opts: ["🪢 nudo", "🍕 pizza", "🎪 circo"],
+    c: 0
+  }, {
+    w: "PUMA",
+    s1: "PU",
+    s2: "MA",
+    tts: "puma",
+    emoji: "🐆",
+    opts: ["🎸 guitarra", "🐆 puma", "🍌 plátano"],
+    c: 1
+  }]
+}, {
+  id: 3,
+  title: "Palabras de tres sílabas",
+  subtitle: "Camino, pelota, maleta…",
+  icon: "🔠",
+  color: "#F59E0B",
+  type: "words3",
+  words: [{
+    w: "MALETA",
+    s1: "MA",
+    s2: "LE",
+    s3: "TA",
+    tts: "maleta",
+    emoji: "🧳",
+    opts: ["🧳 maleta", "🌙 luna", "🍎 manzana"],
+    c: 0
+  }, {
+    w: "PELOTA",
+    s1: "PE",
+    s2: "LO",
+    s3: "TA",
+    tts: "pelota",
+    emoji: "⚽",
+    opts: ["🌸 flor", "⚽ pelota", "🎵 música"],
+    c: 1
+  }, {
+    w: "CAMINO",
+    s1: "CA",
+    s2: "MI",
+    s3: "NO",
+    tts: "camino",
+    emoji: "🛤️",
+    opts: ["🌊 mar", "🐦 pájaro", "🛤️ camino"],
+    c: 2
+  }, {
+    w: "PALOMA",
+    s1: "PA",
+    s2: "LO",
+    s3: "MA",
+    tts: "paloma",
+    emoji: "🕊️",
+    opts: ["🎸 guitarra", "🕊️ paloma", "🍌 plátano"],
+    c: 1
+  }, {
+    w: "TOMATE",
+    s1: "TO",
+    s2: "MA",
+    s3: "TE",
+    tts: "tomate",
+    emoji: "🍅",
+    opts: ["🌺 rosa", "🐬 delfín", "🍅 tomate"],
+    c: 2
+  }, {
+    w: "MELENA",
+    s1: "ME",
+    s2: "LE",
+    s3: "NA",
+    tts: "melena",
+    emoji: "💇",
+    opts: ["💇 melena", "🦋 mariposa", "🐴 caballo"],
+    c: 0
+  }, {
+    w: "SEMANA",
+    s1: "SE",
+    s2: "MA",
+    s3: "NA",
+    tts: "semana",
+    emoji: "📅",
+    opts: ["🍦 helado", "📅 semana", "🐙 pulpo"],
+    c: 1
+  }, {
+    w: "PATATA",
+    s1: "PA",
+    s2: "TA",
+    s3: "TA",
+    tts: "patata",
+    emoji: "🥔",
+    opts: ["🦁 león", "🎀 lazo", "🥔 patata"],
+    c: 2
+  }, {
+    w: "MEDALLA",
+    s1: "ME",
+    s2: "DA",
+    s3: "LLA",
+    tts: "medalla",
+    emoji: "🥇",
+    opts: ["🌸 flor", "🥇 medalla", "🎵 nota"],
+    c: 1
+  }, {
+    w: "FAMILIA",
+    s1: "FA",
+    s2: "MI",
+    s3: "LIA",
+    tts: "familia",
+    emoji: "👨‍👩‍👧",
+    opts: ["🌊 mar", "🐦 pájaro", "👨‍👩‍👧 familia"],
+    c: 2
+  }, {
+    w: "PANTERA",
+    s1: "PAN",
+    s2: "TE",
+    s3: "RA",
+    tts: "pantera",
+    emoji: "🐆",
+    opts: ["🐆 pantera", "🍕 pizza", "🎪 circo"],
+    c: 0
+  }]
+}, {
+  id: 4,
+  title: "Nuevas letras",
+  subtitle: "B · R · C · F · G · J · V",
+  icon: "🌿",
+  color: "#10B981",
+  type: "syllables",
+  syllables: ["BA", "BE", "BI", "BO", "BU", "RA", "RE", "RI", "RO", "RU", "CA", "CE", "CI", "CO", "CU", "FA", "FE", "FI", "FO", "FU", "GA", "GE", "GI", "GO", "GU", "JA", "JE", "JI", "JO", "JU", "VA", "VE", "VI", "VO", "VU"]
+}, {
+  id: 5,
+  title: "Más palabras",
+  subtitle: "Boca, rana, gato…",
+  icon: "🔤",
+  color: "#EC4899",
+  type: "words",
+  words: [{
+    w: "BOCA",
+    s1: "BO",
+    s2: "CA",
+    tts: "boca",
+    emoji: "👄",
+    opts: ["👄 boca", "🚀 cohete", "🍎 manzana"],
+    c: 0
+  }, {
+    w: "ROPA",
+    s1: "RO",
+    s2: "PA",
+    tts: "ropa",
+    emoji: "👕",
+    opts: ["🌸 flor", "👕 ropa", "🎵 música"],
+    c: 1
+  }, {
+    w: "CAMA",
+    s1: "CA",
+    s2: "MA",
+    tts: "cama",
+    emoji: "🛏️",
+    opts: ["🌊 mar", "🐦 pájaro", "🛏️ cama"],
+    c: 2
+  }, {
+    w: "FOCA",
+    s1: "FO",
+    s2: "CA",
+    tts: "foca",
+    emoji: "🦭",
+    opts: ["🦭 foca", "🍕 pizza", "🎪 circo"],
+    c: 0
+  }, {
+    w: "GATO",
+    s1: "GA",
+    s2: "TO",
+    tts: "gato",
+    emoji: "🐱",
+    opts: ["🎸 guitarra", "🐱 gato", "🍌 plátano"],
+    c: 1
+  }, {
+    w: "BESO",
+    s1: "BE",
+    s2: "SO",
+    tts: "beso",
+    emoji: "💋",
+    opts: ["🌺 rosa", "🐬 delfín", "💋 beso"],
+    c: 2
+  }, {
+    w: "VASO",
+    s1: "VA",
+    s2: "SO",
+    tts: "vaso",
+    emoji: "🥛",
+    opts: ["🥛 vaso", "🦋 mariposa", "🐴 caballo"],
+    c: 0
+  }, {
+    w: "RANA",
+    s1: "RA",
+    s2: "NA",
+    tts: "rana",
+    emoji: "🐸",
+    opts: ["🍦 helado", "🐸 rana", "🐙 pulpo"],
+    c: 1
+  }, {
+    w: "FARO",
+    s1: "FA",
+    s2: "RO",
+    tts: "faro",
+    emoji: "🏮",
+    opts: ["🏮 faro", "🌙 luna", "🐟 pez"],
+    c: 0
+  }, {
+    w: "JUGO",
+    s1: "JU",
+    s2: "GO",
+    tts: "jugo",
+    emoji: "🧃",
+    opts: ["🧃 jugo", "🎪 circo", "🌸 flor"],
+    c: 0
+  }, {
+    w: "VELA",
+    s1: "VE",
+    s2: "LA",
+    tts: "vela",
+    emoji: "🕯️",
+    opts: ["🌊 mar", "🕯️ vela", "🐦 pájaro"],
+    c: 1
+  }, {
+    w: "CABO",
+    s1: "CA",
+    s2: "BO",
+    tts: "cabo",
+    emoji: "⛵",
+    opts: ["🦁 león", "🎀 lazo", "⛵ cabo"],
+    c: 2
+  }]
+}, {
+  id: 6,
+  title: "Más palabras largas",
+  subtitle: "Barriga, regalo, cebolla…",
+  icon: "🔡",
+  color: "#06B6D4",
+  type: "words3",
+  words: [{
+    w: "BARRIGA",
+    s1: "BA",
+    s2: "RRI",
+    s3: "GA",
+    tts: "barriga",
+    emoji: "🤰",
+    opts: ["🤰 barriga", "🌙 luna", "🍎 manzana"],
+    c: 0
+  }, {
+    w: "REGALO",
+    s1: "RE",
+    s2: "GA",
+    s3: "LO",
+    tts: "regalo",
+    emoji: "🎁",
+    opts: ["🌸 flor", "🎁 regalo", "🎵 música"],
+    c: 1
+  }, {
+    w: "CEBOLLA",
+    s1: "CE",
+    s2: "BO",
+    s3: "LLA",
+    tts: "cebolla",
+    emoji: "🧅",
+    opts: ["🌊 mar", "🐦 pájaro", "🧅 cebolla"],
+    c: 2
+  }, {
+    w: "JIRAFA",
+    s1: "JI",
+    s2: "RA",
+    s3: "FA",
+    tts: "jirafa",
+    emoji: "🦒",
+    opts: ["🦒 jirafa", "🍕 pizza", "🎪 circo"],
+    c: 0
+  }, {
+    w: "BOTELLA",
+    s1: "BO",
+    s2: "TE",
+    s3: "LLA",
+    tts: "botella",
+    emoji: "🍾",
+    opts: ["🌺 rosa", "🐬 delfín", "🍾 botella"],
+    c: 2
+  }, {
+    w: "CABEZA",
+    s1: "CA",
+    s2: "BE",
+    s3: "ZA",
+    tts: "cabeza",
+    emoji: "🗣️",
+    opts: ["🗣️ cabeza", "🦋 mariposa", "🐴 caballo"],
+    c: 0
+  }, {
+    w: "BUFANDA",
+    s1: "BU",
+    s2: "FAN",
+    s3: "DA",
+    tts: "bufanda",
+    emoji: "🧣",
+    opts: ["🍦 helado", "🧣 bufanda", "🐙 pulpo"],
+    c: 1
+  }, {
+    w: "GAVILÁN",
+    s1: "GA",
+    s2: "VI",
+    s3: "LÁN",
+    tts: "gavilán",
+    emoji: "🦅",
+    opts: ["🎸 guitarra", "🦅 gavilán", "🍌 plátano"],
+    c: 1
+  }]
+}, {
+  id: 7,
+  title: "Letras especiales",
+  subtitle: "Ñ · Ch · Ll · Z · X · Y · H · Q",
+  icon: "⚡",
+  color: "#EF4444",
+  type: "syllables",
+  syllables: ["ÑA", "ÑE", "ÑI", "ÑO", "ÑU", "CHA", "CHE", "CHI", "CHO", "CHU", "LLA", "LLE", "LLI", "LLO", "LLU", "ZA", "ZE", "ZI", "ZO", "ZU", "YA", "YE", "YO", "YU", "HA", "HE", "HI", "HO", "HU", "QUE", "QUI"]
+}, {
+  id: 8,
+  title: "Palabras especiales",
+  subtitle: "Niño, leche, llave…",
+  icon: "🔥",
+  color: "#F97316",
+  type: "words",
+  words: [{
+    w: "NIÑO",
+    s1: "NI",
+    s2: "ÑO",
+    tts: "niño",
+    emoji: "👦",
+    opts: ["👦 niño", "🌙 luna", "🍎 manzana"],
+    c: 0
+  }, {
+    w: "LECHE",
+    s1: "LE",
+    s2: "CHE",
+    tts: "leche",
+    emoji: "🥛",
+    opts: ["🌸 flor", "🥛 leche", "🎵 música"],
+    c: 1
+  }, {
+    w: "LLAVE",
+    s1: "LLA",
+    s2: "VE",
+    tts: "llave",
+    emoji: "🗝️",
+    opts: ["🌊 mar", "🐦 pájaro", "🗝️ llave"],
+    c: 2
+  }, {
+    w: "YEMA",
+    s1: "YE",
+    s2: "MA",
+    tts: "yema",
+    emoji: "🥚",
+    opts: ["🎸 guitarra", "🥚 yema", "🍌 plátano"],
+    c: 1
+  }, {
+    w: "QUESO",
+    s1: "QUE",
+    s2: "SO",
+    tts: "queso",
+    emoji: "🧀",
+    opts: ["🌺 rosa", "🐬 delfín", "🧀 queso"],
+    c: 2
+  }, {
+    w: "HACHA",
+    s1: "HA",
+    s2: "CHA",
+    tts: "hacha",
+    emoji: "🪓",
+    opts: ["🪓 hacha", "🦋 mariposa", "🐴 caballo"],
+    c: 0
+  }, {
+    w: "COCHE",
+    s1: "CO",
+    s2: "CHE",
+    tts: "coche",
+    emoji: "🚗",
+    opts: ["🍦 helado", "🚗 coche", "🐙 pulpo"],
+    c: 1
+  }]
+}, {
+  id: 9,
+  title: "Palabras con Ñ y Ch",
+  subtitle: "Zapato, muñeca, chapa…",
+  icon: "🌟",
+  color: "#A855F7",
+  type: "words3",
+  words: [{
+    w: "ZAPATO",
+    s1: "ZA",
+    s2: "PA",
+    s3: "TO",
+    tts: "zapato",
+    emoji: "👟",
+    opts: ["👟 zapato", "🍕 pizza", "🎪 circo"],
+    c: 0
+  }, {
+    w: "MUÑECA",
+    s1: "MU",
+    s2: "ÑE",
+    s3: "CA",
+    tts: "muñeca",
+    emoji: "🪆",
+    opts: ["🌸 flor", "🪆 muñeca", "🎵 música"],
+    c: 1
+  }, {
+    w: "CUCHARA",
+    s1: "CU",
+    s2: "CHA",
+    s3: "RA",
+    tts: "cuchara",
+    emoji: "🥄",
+    opts: ["🌊 mar", "🐦 pájaro", "🥄 cuchara"],
+    c: 2
+  }, {
+    w: "CHORIZO",
+    s1: "CHO",
+    s2: "RI",
+    s3: "ZO",
+    tts: "chorizo",
+    emoji: "🌭",
+    opts: ["🌭 chorizo", "🍕 pizza", "🎪 circo"],
+    c: 0
+  }, {
+    w: "VENTANA",
+    s1: "VEN",
+    s2: "TA",
+    s3: "NA",
+    tts: "ventana",
+    emoji: "🪟",
+    opts: ["🎸 guitarra", "🪟 ventana", "🍌 plátano"],
+    c: 1
+  }, {
+    w: "CABALLO",
+    s1: "CA",
+    s2: "BA",
+    s3: "LLO",
+    tts: "caballo",
+    emoji: "🐴",
+    opts: ["🌺 rosa", "🐬 delfín", "🐴 caballo"],
+    c: 2
+  }, {
+    w: "GALLETA",
+    s1: "GA",
+    s2: "LLE",
+    s3: "TA",
+    tts: "galleta",
+    emoji: "🍪",
+    opts: ["🍪 galleta", "🦋 mariposa", "🐙 pulpo"],
+    c: 0
+  }]
+}, {
+  id: 10,
+  title: "Sílabas al revés",
+  subtitle: "Al · En · Is · Un · Ar…",
+  icon: "🔄",
+  color: "#6366F1",
+  type: "syllables",
+  isInverse: true,
+  syllables: ["AL", "EL", "IL", "OL", "UL", "AN", "EN", "IN", "ON", "UN", "AR", "ER", "IR", "OR", "UR", "AS", "ES", "IS", "OS", "US", "AM", "EM", "IM", "OM", "UM", "AP", "EP", "IP", "OP", "UP"]
+}, {
+  id: 11,
+  title: "Palabras inversas",
+  subtitle: "Arco, isla, alma…",
+  icon: "🧩",
+  color: "#0EA5E9",
+  type: "words",
+  words: [{
+    w: "ALMA",
+    s1: "AL",
+    s2: "MA",
+    tts: "alma",
+    emoji: "💛",
+    opts: ["💛 alma", "🚗 coche", "🍎 manzana"],
+    c: 0
+  }, {
+    w: "ARCO",
+    s1: "AR",
+    s2: "CO",
+    tts: "arco",
+    emoji: "🌈",
+    opts: ["🌸 flor", "🌈 arco", "🎵 música"],
+    c: 1
+  }, {
+    w: "ISLA",
+    s1: "IS",
+    s2: "LA",
+    tts: "isla",
+    emoji: "🏝️",
+    opts: ["🌊 mar", "🐦 pájaro", "🏝️ isla"],
+    c: 2
+  }, {
+    w: "OLLA",
+    s1: "OL",
+    s2: "LA",
+    tts: "olla",
+    emoji: "🍳",
+    opts: ["🍳 olla", "🍕 pizza", "🎪 circo"],
+    c: 0
+  }, {
+    w: "URNA",
+    s1: "UR",
+    s2: "NA",
+    tts: "urna",
+    emoji: "🏺",
+    opts: ["🎸 guitarra", "🏺 urna", "🍌 plátano"],
+    c: 1
+  }, {
+    w: "ELFO",
+    s1: "EL",
+    s2: "FO",
+    tts: "elfo",
+    emoji: "🧝",
+    opts: ["🌺 rosa", "🐬 delfín", "🧝 elfo"],
+    c: 2
+  }]
+}, {
+  id: 12,
+  title: "Sílabas trabadas",
+  subtitle: "Bra · Cla · Pre · Glo · Tra…",
+  icon: "⚙️",
+  color: "#EC4899",
+  type: "syllables",
+  syllables: ["BRA", "BRE", "BRI", "BRO", "BRU", "CLA", "CLE", "CLI", "CLO", "CLU", "PRA", "PRE", "PRI", "PRO", "PRU", "GLA", "GLE", "GLI", "GLO", "GLU", "TRA", "TRE", "TRI", "TRO", "TRU", "FRA", "FRE", "FRI", "FRO", "FRU", "CRA", "CRE", "CRI", "CRO", "CRU", "DRA", "DRE", "DRI", "DRO", "DRU", "GRA", "GRE", "GRI", "GRO", "GRU"]
+}, {
+  id: 13,
+  title: "Palabras trabadas",
+  subtitle: "Brazo, globo, tren…",
+  icon: "🎯",
+  color: "#14B8A6",
+  type: "words",
+  words: [{
+    w: "BRAZO",
+    s1: "BRA",
+    s2: "ZO",
+    tts: "brazo",
+    emoji: "💪",
+    opts: ["💪 brazo", "🌙 luna", "🐟 pez"],
+    c: 0
+  }, {
+    w: "CLAVO",
+    s1: "CLA",
+    s2: "VO",
+    tts: "clavo",
+    emoji: "🔩",
+    opts: ["🌸 flor", "🔩 clavo", "🎵 música"],
+    c: 1
+  }, {
+    w: "FRUTA",
+    s1: "FRU",
+    s2: "TA",
+    tts: "fruta",
+    emoji: "🍓",
+    opts: ["🌊 mar", "🐦 pájaro", "🍓 fruta"],
+    c: 2
+  }, {
+    w: "GLOBO",
+    s1: "GLO",
+    s2: "BO",
+    tts: "globo",
+    emoji: "🎈",
+    opts: ["🎈 globo", "🍕 pizza", "🎪 circo"],
+    c: 0
+  }, {
+    w: "DRAMA",
+    s1: "DRA",
+    s2: "MA",
+    tts: "drama",
+    emoji: "🎭",
+    opts: ["🌺 rosa", "🐬 delfín", "🎭 drama"],
+    c: 2
+  }, {
+    w: "GRANJA",
+    s1: "GRAN",
+    s2: "JA",
+    tts: "granja",
+    emoji: "🏡",
+    opts: ["🏡 granja", "🦋 mariposa", "🐴 caballo"],
+    c: 0
+  }, {
+    w: "TREN",
+    s1: "TREN",
+    s2: "",
+    tts: "tren",
+    emoji: "🚂",
+    opts: ["🎸 guitarra", "🚂 tren", "🍌 plátano"],
+    c: 1,
+    mono: true
+  }]
+}, {
+  id: 14,
+  title: "Leo frases",
+  subtitle: "Frases cortas completas",
+  icon: "💬",
+  color: "#84CC16",
+  type: "phrases",
+  phrases: [{
+    phrase: "MI MAMÁ ME AMA",
+    tts: "mi mamá me ama",
+    words: ["MI", "MAMÁ", "ME", "AMA"],
+    emoji: "💗"
+  }, {
+    phrase: "EL GATO ES TRAVIESO",
+    tts: "el gato es travieso",
+    words: ["EL", "GATO", "ES", "TRAVIESO"],
+    emoji: "😼"
+  }, {
+    phrase: "LA LUNA SALE",
+    tts: "la luna sale",
+    words: ["LA", "LUNA", "SALE"],
+    emoji: "🌙"
+  }, {
+    phrase: "MI PAPÁ COME SOPA",
+    tts: "mi papá come sopa",
+    words: ["MI", "PAPÁ", "COME", "SOPA"],
+    emoji: "🍲"
+  }, {
+    phrase: "LA RANA SALTA",
+    tts: "la rana salta",
+    words: ["LA", "RANA", "SALTA"],
+    emoji: "🐸"
+  }, {
+    phrase: "EL TREN VA RÁPIDO",
+    tts: "el tren va rápido",
+    words: ["EL", "TREN", "VA", "RÁPIDO"],
+    emoji: "🚂"
+  }]
+}, {
+  id: 15,
+  title: "Leo y entiendo",
+  subtitle: "Textos con preguntas",
+  icon: "📰",
+  color: "#A855F7",
+  type: "reading",
+  texts: [{
+    title: "El gato y el ratón",
+    emoji: "🐱",
+    tts: "El gato ve al ratón. El ratón corre muy rápido. El gato no lo pilla. El ratón es muy listo.",
+    text: "El gato ve al ratón.\nEl ratón corre muy rápido.\nEl gato no lo pilla.\nEl ratón es muy listo.",
+    questions: [{
+      q: "¿Qué ve el gato?",
+      tts: "¿Qué ve el gato?",
+      opts: ["Un perro", "Un ratón", "Un pez"],
+      c: 1
+    }, {
+      q: "¿Quién corre?",
+      tts: "¿Quién corre?",
+      opts: ["El gato", "El perro", "El ratón"],
+      c: 2
+    }, {
+      q: "¿Es listo el ratón?",
+      tts: "¿Es listo el ratón?",
+      opts: ["Sí, mucho", "No", "No sé"],
+      c: 0
+    }]
+  }, {
+    title: "Mi familia",
+    emoji: "👨‍👩‍👦",
+    tts: "Mi mamá se llama Ana. Mi papá se llama Luis. Tenemos un perro. Se llama Tobi.",
+    text: "Mi mamá se llama Ana.\nMi papá se llama Luis.\nTenemos un perro.\nSe llama Tobi.",
+    questions: [{
+      q: "¿Cómo se llama la mamá?",
+      tts: "¿Cómo se llama la mamá?",
+      opts: ["Lucía", "Ana", "María"],
+      c: 1
+    }, {
+      q: "¿Tienen un gato?",
+      tts: "¿Tienen un gato?",
+      opts: ["Sí", "No, un perro", "No sé"],
+      c: 1
+    }, {
+      q: "¿Cómo se llama el perro?",
+      tts: "¿Cómo se llama el perro?",
+      opts: ["Tobi", "Coco", "Rex"],
+      c: 0
+    }]
+  }]
+}, {
+  id: 16,
+  title: "Dictado: palabras",
+  subtitle: "Escucho y escribo",
+  icon: "✏️",
+  color: "#F43F5E",
+  type: "dictation",
+  dictItems: [{
+    text: "MAPA",
+    tts: "mapa",
+    hint: "Sirve para encontrar caminos 🗺️"
+  }, {
+    text: "LUNA",
+    tts: "luna",
+    hint: "Brilla por la noche 🌙"
+  }, {
+    text: "SOPA",
+    tts: "sopa",
+    hint: "La comes caliente con cuchara 🍲"
+  }, {
+    text: "GATO",
+    tts: "gato",
+    hint: "Animal que hace miau 🐱"
+  }, {
+    text: "ROPA",
+    tts: "ropa",
+    hint: "Lo que te pones encima 👕"
+  }, {
+    text: "BRAZO",
+    tts: "brazo",
+    hint: "Lo usas para abrazar 💪"
+  }, {
+    text: "GLOBO",
+    tts: "globo",
+    hint: "Vuela lleno de aire 🎈"
+  }, {
+    text: "FRUTA",
+    tts: "fruta",
+    hint: "La manzana es una ___ 🍎"
+  }, {
+    text: "NIÑO",
+    tts: "niño",
+    hint: "Un chico pequeño 👦"
+  }, {
+    text: "QUESO",
+    tts: "queso",
+    hint: "Lo pones en el bocadillo 🧀"
+  }]
+}, {
+  id: 17,
+  title: "Dictado: frases",
+  subtitle: "Escucho y escribo frases",
+  icon: "📝",
+  color: "#7C3AED",
+  type: "dictation",
+  dictItems: [{
+    text: "MI GATO ES MALO",
+    tts: "mi gato es malo",
+    hint: "Frase sobre un gato travieso 😾"
+  }, {
+    text: "LA LUNA SALE",
+    tts: "la luna sale",
+    hint: "Algo que pasa por la noche 🌙"
+  }, {
+    text: "EL TREN VA RAPIDO",
+    tts: "el tren va rápido",
+    hint: "Frase sobre un tren 🚂"
+  }, {
+    text: "MI MAMA ME AMA",
+    tts: "mi mamá me ama",
+    hint: "Frase de amor familiar 💗"
+  }, {
+    text: "LA RANA SALTA",
+    tts: "la rana salta",
+    hint: "Lo que hace la rana 🐸"
+  }]
+}];
 
 // ═══════════════════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════════════════
 const shuffle = arr => [...arr].sort(() => Math.random() - 0.5);
-const pick    = arr => arr[Math.floor(Math.random() * arr.length)];
-const MSG_OK   = ["¡Genial! 🌟","¡Muy bien! 🎉","¡Súper! ⭐","¡Ole, campeón! 🏆","¡Fenomenal! 🚀","¡Lo has clavado! 💥","¡Eres un crack! 🔥"];
-const MSG_FAIL = ["¡Inténtalo otra vez, campeón! 💪","¡Casi! Vamos de nuevo 🔄","¡Tú puedes! 🌈","¡Ánimo, que tú lo sabes! 😊"];
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
+const MSG_OK = ["¡Genial! 🌟", "¡Muy bien! 🎉", "¡Súper! ⭐", "¡Ole, campeón! 🏆", "¡Fenomenal! 🚀", "¡Lo has clavado! 💥", "¡Eres un crack! 🔥"];
+const MSG_FAIL = ["¡Inténtalo otra vez, campeón! 💪", "¡Casi! Vamos de nuevo 🔄", "¡Tú puedes! 🌈", "¡Ánimo, que tú lo sabes! 😊"];
 const ADMIN_PIN = "280608";
 
 // ─── Persistence ─────────────────────────────────────────────────
@@ -392,1141 +1039,2845 @@ function initStore() {
     if (s) {
       // Always recompute unlocked from completed — never trust stale unlocked in storage
       const unlocked = computeUnlocked(s.completed || []);
-      const clean = { ...s, unlocked };
+      const clean = {
+        ...s,
+        unlocked
+      };
       localStorage.setItem(STORE_KEY, JSON.stringify(clean));
       return clean;
     }
   } catch {}
-  return { stars:0, unlocked:[1], completed:[], starsPerLevel:{}, caseMode:"upper" };
+  return {
+    stars: 0,
+    unlocked: [1],
+    completed: [],
+    starsPerLevel: {},
+    caseMode: "upper"
+  };
 }
 function useStore() {
-  const [store,setStore]=useState(initStore);
+  const [store, setStore] = useState(initStore);
   // sessionUnlocked: levels opened via admin PIN — NOT saved, reset when returning to map
-  const [sessionUnlocked,setSessionUnlocked]=useState([]);
-
-  const update=fn=>setStore(prev=>{
-    const n=fn(prev);
-    try{localStorage.setItem(STORE_KEY,JSON.stringify(n));}catch{}
+  const [sessionUnlocked, setSessionUnlocked] = useState([]);
+  const update = fn => setStore(prev => {
+    const n = fn(prev);
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(n));
+    } catch {}
     return n;
   });
-  const completeLevel=(id,s)=>update(prev=>{
-    setSessionUnlocked(su=>su.filter(x=>x!==id));
-    const completed=prev.completed.includes(id)?prev.completed:[...prev.completed,id];
-    return {...prev,
-      completed,
-      unlocked:computeUnlocked(completed),
-      starsPerLevel:{...prev.starsPerLevel,[id]:Math.max(prev.starsPerLevel[id]||0,s)},
-    };
-  });
-  const addStars=n=>update(p=>({...p,stars:p.stars+n}));
-  const setCaseMode=m=>update(p=>({...p,caseMode:m}));
+  const completeLevel = (id, s) => {
+    setSessionUnlocked(su => su.filter(x => x !== id));
+    update(prev => {
+      const completed = prev.completed.includes(id) ? prev.completed : [...prev.completed, id];
+      return {
+        ...prev,
+        completed,
+        unlocked: computeUnlocked(completed),
+        starsPerLevel: {
+          ...prev.starsPerLevel,
+          [id]: Math.max(prev.starsPerLevel[id] || 0, s)
+        }
+      };
+    });
+  };
+  const addStars = n => update(p => ({
+    ...p,
+    stars: p.stars + n
+  }));
+  const setCaseMode = m => update(p => ({
+    ...p,
+    caseMode: m
+  }));
   // Admin unlock: session-only, disappears when back on map
-  const adminUnlock=(id)=>setSessionUnlocked(su=>su.includes(id)?su:[...su,id]);
-  const clearSessionUnlocks=()=>setSessionUnlocked([]);
-  const isUnlocked=(id)=>store.unlocked.includes(id)||sessionUnlocked.includes(id);
-  const reset=()=>{
-    const f=initStore();
-    try{localStorage.setItem(STORE_KEY,JSON.stringify(f));}catch{}
+  const adminUnlock = id => setSessionUnlocked(su => su.includes(id) ? su : [...su, id]);
+  const clearSessionUnlocks = () => setSessionUnlocked([]);
+  const isUnlocked = id => store.unlocked.includes(id) || sessionUnlocked.includes(id);
+  const reset = () => {
+    const f = initStore();
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(f));
+    } catch {}
     setStore(f);
     setSessionUnlocked([]);
   };
-  return {store,sessionUnlocked,isUnlocked,completeLevel,addStars,setCaseMode,adminUnlock,clearSessionUnlocks,reset};
+  return {
+    store,
+    sessionUnlocked,
+    isUnlocked,
+    completeLevel,
+    addStars,
+    setCaseMode,
+    adminUnlock,
+    clearSessionUnlocks,
+    reset
+  };
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // UI ATOMS
 // ═══════════════════════════════════════════════════════════════════
-function Btn({color="#06B6D4",size="md",onClick,children,disabled=false,style={}}) {
-  const pad=size==="lg"?"17px 32px":size==="sm"?"8px 16px":"13px 24px";
-  const fs=size==="lg"?19:size==="sm"?13:16;
-  return (
-    <button disabled={disabled} onClick={onClick} style={{
-      background:disabled?"#CBD5E0":color,color:"white",border:"none",
-      borderRadius:22,padding:pad,fontSize:fs,fontWeight:900,
-      cursor:disabled?"default":"pointer",
-      boxShadow:disabled?"none":`0 5px 20px ${color}55`,
-      fontFamily:FONT_PRINT,transition:"transform 0.12s,box-shadow 0.12s",
-      display:"inline-flex",alignItems:"center",justifyContent:"center",gap:8,...style,
-    }}
-      onMouseEnter={e=>{if(!disabled){e.currentTarget.style.transform="scale(1.06)";e.currentTarget.style.boxShadow=`0 8px 28px ${color}77`;}}}
-      onMouseLeave={e=>{e.currentTarget.style.transform="scale(1)";e.currentTarget.style.boxShadow=disabled?"none":`0 5px 20px ${color}55`;}}
-    >{children}</button>
-  );
+function Btn({
+  color = "#06B6D4",
+  size = "md",
+  onClick,
+  children,
+  disabled = false,
+  style = {}
+}) {
+  const pad = size === "lg" ? "17px 32px" : size === "sm" ? "8px 16px" : "13px 24px";
+  const fs = size === "lg" ? 19 : size === "sm" ? 13 : 16;
+  return /*#__PURE__*/React.createElement("button", {
+    disabled: disabled,
+    onClick: onClick,
+    style: {
+      background: disabled ? "#CBD5E0" : color,
+      color: "white",
+      border: "none",
+      borderRadius: 22,
+      padding: pad,
+      fontSize: fs,
+      fontWeight: 900,
+      cursor: disabled ? "default" : "pointer",
+      boxShadow: disabled ? "none" : `0 5px 20px ${color}55`,
+      fontFamily: FONT_PRINT,
+      transition: "transform 0.12s,box-shadow 0.12s",
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: 8,
+      ...style
+    },
+    onMouseEnter: e => {
+      if (!disabled) {
+        e.currentTarget.style.transform = "scale(1.06)";
+        e.currentTarget.style.boxShadow = `0 8px 28px ${color}77`;
+      }
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.transform = "scale(1)";
+      e.currentTarget.style.boxShadow = disabled ? "none" : `0 5px 20px ${color}55`;
+    }
+  }, children);
 }
-
-function Card({children,style={}}) {
-  return <div style={{background:T.card,borderRadius:24,padding:"20px 18px",boxShadow:"0 4px 28px rgba(0,0,0,0.07)",...style}}>{children}</div>;
+function Card({
+  children,
+  style = {}
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: T.card,
+      borderRadius: 24,
+      padding: "20px 18px",
+      boxShadow: "0 4px 28px rgba(0,0,0,0.07)",
+      ...style
+    }
+  }, children);
 }
-
-function ProgressBar({value,max,color="#06B6D4",h=14}) {
-  return (
-    <div style={{background:T.border,borderRadius:99,height:h,overflow:"hidden"}}>
-      <div style={{width:`${Math.min(100,max?((value/max)*100):0)}%`,height:"100%",background:color,borderRadius:99,transition:"width 0.5s cubic-bezier(.4,0,.2,1)"}}/>
-    </div>
-  );
-}
-
-function Stars({count,max=3,size=22}) {
-  return <span>{Array.from({length:max},(_,i)=><span key={i} style={{fontSize:size,opacity:i<count?1:0.2}}>⭐</span>)}</span>;
-}
-
-function Confetti({active}) {
-  if(!active) return null;
-  const pieces=Array.from({length:50},(_,i)=>({
-    id:i,left:Math.random()*100,delay:Math.random()*0.7,
-    color:["#FF6B6B","#FFD93D","#6BCB77","#4D96FF","#FF6FC8","#C77DFF","#4ECDC4","#F97316"][i%8],
-    size:8+Math.random()*10,shape:i%3===0?"4px":"50%",
+function ProgressBar({
+  value,
+  max,
+  color = "#06B6D4",
+  h = 14
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: T.border,
+      borderRadius: 99,
+      height: h,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${Math.min(100, max ? value / max * 100 : 0)}%`,
+      height: "100%",
+      background: color,
+      borderRadius: 99,
+      transition: "width 0.5s cubic-bezier(.4,0,.2,1)"
+    }
   }));
-  return (
-    <div style={{position:"fixed",top:0,left:0,width:"100%",height:"100%",pointerEvents:"none",zIndex:9999}}>
-      {pieces.map(p=><div key={p.id} style={{position:"absolute",left:`${p.left}%`,top:"-28px",width:p.size,height:p.size,borderRadius:p.shape,background:p.color,animation:"cfFall 2s ease-in forwards",animationDelay:`${p.delay}s`}}/>)}
-    </div>
-  );
 }
-
-function SlowBar({active,onDone,ms=1500}) {
-  const [pct,setPct]=useState(0);
-  useEffect(()=>{
-    if(!active){setPct(0);return;}
-    const t0=Date.now();
-    const id=setInterval(()=>{
-      const p=Math.min(100,((Date.now()-t0)/ms)*100);
+function Stars({
+  count,
+  max = 3,
+  size = 22
+}) {
+  return /*#__PURE__*/React.createElement("span", null, Array.from({
+    length: max
+  }, (_, i) => /*#__PURE__*/React.createElement("span", {
+    key: i,
+    style: {
+      fontSize: size,
+      opacity: i < count ? 1 : 0.2
+    }
+  }, "\u2B50")));
+}
+function Confetti({
+  active
+}) {
+  if (!active) return null;
+  const pieces = Array.from({
+    length: 50
+  }, (_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    delay: Math.random() * 0.7,
+    color: ["#FF6B6B", "#FFD93D", "#6BCB77", "#4D96FF", "#FF6FC8", "#C77DFF", "#4ECDC4", "#F97316"][i % 8],
+    size: 8 + Math.random() * 10,
+    shape: i % 3 === 0 ? "4px" : "50%"
+  }));
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      pointerEvents: "none",
+      zIndex: 9999
+    }
+  }, pieces.map(p => /*#__PURE__*/React.createElement("div", {
+    key: p.id,
+    style: {
+      position: "absolute",
+      left: `${p.left}%`,
+      top: "-28px",
+      width: p.size,
+      height: p.size,
+      borderRadius: p.shape,
+      background: p.color,
+      animation: "cfFall 2s ease-in forwards",
+      animationDelay: `${p.delay}s`
+    }
+  })));
+}
+function SlowBar({
+  active,
+  onDone,
+  ms = 1500
+}) {
+  const [pct, setPct] = useState(0);
+  useEffect(() => {
+    if (!active) {
+      setPct(0);
+      return;
+    }
+    const t0 = Date.now();
+    const id = setInterval(() => {
+      const p = Math.min(100, (Date.now() - t0) / ms * 100);
       setPct(p);
-      if(p>=100){clearInterval(id);onDone();}
-    },28);
-    return()=>clearInterval(id);
-  },[active,ms]);
-  if(!active) return null;
-  return (
-    <div style={{margin:"12px 0 4px",width:"100%"}}>
-      <p style={{fontSize:13,color:T.muted,fontWeight:700,textAlign:"center",marginBottom:6}}>⏳ Espera un momento…</p>
-      <div style={{background:T.border,borderRadius:99,height:16,overflow:"hidden"}}>
-        <div style={{width:`${pct}%`,height:"100%",background:"linear-gradient(90deg,#22C55E,#06B6D4)",borderRadius:99,transition:"width 0.03s linear"}}/>
-      </div>
-    </div>
-  );
+      if (p >= 100) {
+        clearInterval(id);
+        onDone();
+      }
+    }, 28);
+    return () => clearInterval(id);
+  }, [active, ms]);
+  if (!active) return null;
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      margin: "12px 0 4px",
+      width: "100%"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: T.muted,
+      fontWeight: 700,
+      textAlign: "center",
+      marginBottom: 6
+    }
+  }, "\u23F3 Espera un momento\u2026"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: T.border,
+      borderRadius: 99,
+      height: 16,
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${pct}%`,
+      height: "100%",
+      background: "linear-gradient(90deg,#22C55E,#06B6D4)",
+      borderRadius: 99,
+      transition: "width 0.03s linear"
+    }
+  })));
 }
-
-function FeedbackBanner({msg,type}) {
-  if(!msg) return null;
-  const ok=type==="ok";
-  return (
-    <div style={{padding:"12px 20px",borderRadius:18,fontSize:17,fontWeight:900,
-      background:ok?"#DCFCE7":"#FEE2E2",color:ok?"#166534":"#991B1B",
-      textAlign:"center",margin:"10px 0",boxShadow:`0 3px 12px ${ok?"#22C55E":"#EF4444"}22`}}>
-      {msg}
-    </div>
-  );
+function FeedbackBanner({
+  msg,
+  type
+}) {
+  if (!msg) return null;
+  const ok = type === "ok";
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "12px 20px",
+      borderRadius: 18,
+      fontSize: 17,
+      fontWeight: 900,
+      background: ok ? "#DCFCE7" : "#FEE2E2",
+      color: ok ? "#166534" : "#991B1B",
+      textAlign: "center",
+      margin: "10px 0",
+      boxShadow: `0 3px 12px ${ok ? "#22C55E" : "#EF4444"}22`
+    }
+  }, msg);
 }
-
-function BackBtn({onClick}) {
-  return (
-    <button onClick={onClick} style={{background:T.bg,border:`2px solid ${T.border}`,borderRadius:14,padding:"8px 16px",cursor:"pointer",fontSize:15,color:T.muted,fontFamily:FONT_PRINT,fontWeight:800,display:"flex",alignItems:"center",gap:4,flexShrink:0}}>← Volver</button>
-  );
+function BackBtn({
+  onClick
+}) {
+  return /*#__PURE__*/React.createElement("button", {
+    onClick: onClick,
+    style: {
+      background: T.bg,
+      border: `2px solid ${T.border}`,
+      borderRadius: 14,
+      padding: "8px 16px",
+      cursor: "pointer",
+      fontSize: 15,
+      color: T.muted,
+      fontFamily: FONT_PRINT,
+      fontWeight: 800,
+      display: "flex",
+      alignItems: "center",
+      gap: 4,
+      flexShrink: 0
+    }
+  }, "\u2190 Volver");
 }
-
-function SpeakBtn({onPress,color="#06B6D4",label="🔊 Escuchar"}) {
-  return (
-    <button onClick={onPress} style={{background:color,border:"none",borderRadius:14,padding:"9px 18px",cursor:"pointer",boxShadow:`0 3px 12px ${color}44`,display:"inline-flex",alignItems:"center",gap:6,fontSize:14,fontWeight:900,color:"white",fontFamily:FONT_PRINT}}>
-      {label}
-    </button>
-  );
+function SpeakBtn({
+  onPress,
+  color = "#06B6D4",
+  label = "🔊 Escuchar"
+}) {
+  return /*#__PURE__*/React.createElement("button", {
+    onClick: onPress,
+    style: {
+      background: color,
+      border: "none",
+      borderRadius: 14,
+      padding: "9px 18px",
+      cursor: "pointer",
+      boxShadow: `0 3px 12px ${color}44`,
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      fontSize: 14,
+      fontWeight: 900,
+      color: "white",
+      fontFamily: FONT_PRINT
+    }
+  }, label);
 }
-
-function CaseToggle({mode,onChange}) {
-  return (
-    <div style={{display:"flex",gap:0,borderRadius:16,overflow:"hidden",border:"2px solid #06B6D4",boxShadow:"0 2px 8px #06B6D422"}}>
-      <button onClick={()=>onChange("upper")} style={{padding:"7px 14px",border:"none",cursor:"pointer",background:mode==="upper"?"#06B6D4":"white",color:mode==="upper"?"white":"#06B6D4",fontFamily:FONT_PRINT,fontSize:15,fontWeight:900,transition:"background 0.2s"}}>ABC</button>
-      <button onClick={()=>onChange("lower")} style={{padding:"7px 14px",border:"none",cursor:"pointer",background:mode==="lower"?"#06B6D4":"white",color:mode==="lower"?"white":"#06B6D4",fontFamily:FONT_SCRIPT,fontSize:20,fontWeight:400,transition:"background 0.2s"}}>abc</button>
-    </div>
-  );
+function CaseToggle({
+  mode,
+  onChange
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 0,
+      borderRadius: 16,
+      overflow: "hidden",
+      border: "2px solid #06B6D4",
+      boxShadow: "0 2px 8px #06B6D422"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => onChange("upper"),
+    style: {
+      padding: "7px 14px",
+      border: "none",
+      cursor: "pointer",
+      background: mode === "upper" ? "#06B6D4" : "white",
+      color: mode === "upper" ? "white" : "#06B6D4",
+      fontFamily: FONT_PRINT,
+      fontSize: 15,
+      fontWeight: 900,
+      transition: "background 0.2s"
+    }
+  }, "ABC"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => onChange("lower"),
+    style: {
+      padding: "7px 14px",
+      border: "none",
+      cursor: "pointer",
+      background: mode === "lower" ? "#06B6D4" : "white",
+      color: mode === "lower" ? "white" : "#06B6D4",
+      fontFamily: FONT_SCRIPT,
+      fontSize: 20,
+      fontWeight: 400,
+      transition: "background 0.2s"
+    }
+  }, "abc"));
 }
-
-function DisplayText({text,mode,style={}}) {
-  const isScript=mode==="lower";
-  return (
-    <span style={{fontFamily:isScript?FONT_SCRIPT:FONT_PRINT,fontWeight:isScript?400:900,...style}}>
-      {isScript?text.toLowerCase():text.toUpperCase()}
-    </span>
-  );
+function DisplayText({
+  text,
+  mode,
+  style = {}
+}) {
+  const isScript = mode === "lower";
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: isScript ? FONT_SCRIPT : FONT_PRINT,
+      fontWeight: isScript ? 400 : 900,
+      ...style
+    }
+  }, isScript ? text.toLowerCase() : text.toUpperCase());
 }
 
 // ─── Syllable number badge ────────────────────────────────────────
-const SYL_COLORS=["#06B6D4","#8B5CF6","#F97316"];
-function SylNum({n,visible}) {
-  if(!visible) return null;
-  return (
-    <span style={{
-      display:"inline-flex",alignItems:"center",justifyContent:"center",
-      width:20,height:20,borderRadius:"50%",
-      background:SYL_COLORS[(n-1)%3],color:"white",
-      fontSize:11,fontWeight:900,fontFamily:FONT_PRINT,
-      position:"absolute",top:-10,left:"50%",transform:"translateX(-50%)",
-      boxShadow:`0 2px 6px ${SYL_COLORS[(n-1)%3]}66`,
-      zIndex:2,
-    }}>{n}</span>
-  );
+const SYL_COLORS = ["#06B6D4", "#8B5CF6", "#F97316"];
+function SylNum({
+  n,
+  visible
+}) {
+  if (!visible) return null;
+  return /*#__PURE__*/React.createElement("span", {
+    style: {
+      display: "inline-flex",
+      alignItems: "center",
+      justifyContent: "center",
+      width: 20,
+      height: 20,
+      borderRadius: "50%",
+      background: SYL_COLORS[(n - 1) % 3],
+      color: "white",
+      fontSize: 11,
+      fontWeight: 900,
+      fontFamily: FONT_PRINT,
+      position: "absolute",
+      top: -10,
+      left: "50%",
+      transform: "translateX(-50%)",
+      boxShadow: `0 2px 6px ${SYL_COLORS[(n - 1) % 3]}66`,
+      zIndex: 2
+    }
+  }, n);
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // ADMIN PIN MODAL
 // ═══════════════════════════════════════════════════════════════════
-function AdminPinModal({levelTitle,onSuccess,onCancel}) {
-  const [digits,setDigits]=useState([]);
-  const [shake,setShake]=useState(false);
-
+function AdminPinModal({
+  levelTitle,
+  onSuccess,
+  onCancel
+}) {
+  const [digits, setDigits] = useState([]);
+  const [shake, setShake] = useState(false);
   function press(d) {
-    if(digits.length>=6) return;
-    const next=[...digits,d];
+    if (digits.length >= 6) return;
+    const next = [...digits, d];
     setDigits(next);
-    if(next.length===6) {
-      if(next.join("")===ADMIN_PIN){
-        setTimeout(onSuccess,400);
+    if (next.length === 6) {
+      if (next.join("") === ADMIN_PIN) {
+        setTimeout(onSuccess, 400);
       } else {
         setShake(true);
-        setTimeout(()=>{setShake(false);setDigits([]);},700);
+        setTimeout(() => {
+          setShake(false);
+          setDigits([]);
+        }, 700);
       }
     }
   }
-
-  return (
-    <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.55)",zIndex:500,display:"flex",alignItems:"flex-end",justifyContent:"center"}}>
-      <div style={{background:T.card,borderRadius:"28px 28px 0 0",padding:"28px 24px 36px",width:"100%",maxWidth:580,animation:"slideUp 0.3s cubic-bezier(.4,0,.2,1)"}}>
-        <p style={{fontWeight:900,color:T.text,fontSize:16,textAlign:"center",marginBottom:4,fontFamily:FONT_PRINT}}>🔑 Desbloquear nivel</p>
-        <p style={{color:T.muted,fontSize:13,textAlign:"center",marginBottom:20}}>{levelTitle}</p>
-        {/* PIN dots */}
-        <div style={{display:"flex",justifyContent:"center",gap:12,marginBottom:24,animation:shake?"shake 0.4s":"none"}}>
-          {Array.from({length:6},(_,i)=>(
-            <div key={i} style={{width:18,height:18,borderRadius:"50%",background:i<digits.length?(digits.length===6&&digits.join("")!==ADMIN_PIN?"#EF4444":"#22C55E"):"#E2E8F0",transition:"background 0.2s"}}/>
-          ))}
-        </div>
-        {/* Keypad */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10,marginBottom:16}}>
-          {[1,2,3,4,5,6,7,8,9,"",0,"⌫"].map((d,i)=>(
-            <button key={i} onClick={()=>{
-              if(d==="⌫") setDigits(p=>p.slice(0,-1));
-              else if(d!==""&&typeof d==="number") press(String(d));
-            }} style={{
-              background:d===""?"transparent":T.bg,border:`2px solid ${d===""?"transparent":T.border}`,
-              borderRadius:18,padding:"16px 0",fontSize:20,fontWeight:900,
-              color:T.text,cursor:d===""?"default":"pointer",fontFamily:FONT_PRINT,
-            }}>{d}</button>
-          ))}
-        </div>
-        <button onClick={onCancel} style={{width:"100%",background:"none",border:`2px solid ${T.border}`,borderRadius:14,padding:"12px 0",cursor:"pointer",fontSize:15,fontWeight:800,color:T.muted,fontFamily:FONT_PRINT}}>Cancelar</button>
-      </div>
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,0.55)",
+      zIndex: 500,
+      display: "flex",
+      alignItems: "flex-end",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: T.card,
+      borderRadius: "28px 28px 0 0",
+      padding: "28px 24px 36px",
+      width: "100%",
+      maxWidth: 580,
+      animation: "slideUp 0.3s cubic-bezier(.4,0,.2,1)"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontWeight: 900,
+      color: T.text,
+      fontSize: 16,
+      textAlign: "center",
+      marginBottom: 4,
+      fontFamily: FONT_PRINT
+    }
+  }, "\uD83D\uDD11 Desbloquear nivel"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: T.muted,
+      fontSize: 13,
+      textAlign: "center",
+      marginBottom: 20
+    }
+  }, levelTitle), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "center",
+      gap: 12,
+      marginBottom: 24,
+      animation: shake ? "shake 0.4s" : "none"
+    }
+  }, Array.from({
+    length: 6
+  }, (_, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      width: 18,
+      height: 18,
+      borderRadius: "50%",
+      background: i < digits.length ? digits.length === 6 && digits.join("") !== ADMIN_PIN ? "#EF4444" : "#22C55E" : "#E2E8F0",
+      transition: "background 0.2s"
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "repeat(3,1fr)",
+      gap: 10,
+      marginBottom: 16
+    }
+  }, [1, 2, 3, 4, 5, 6, 7, 8, 9, "", 0, "⌫"].map((d, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    onClick: () => {
+      if (d === "⌫") setDigits(p => p.slice(0, -1));else if (d !== "" && typeof d === "number") press(String(d));
+    },
+    style: {
+      background: d === "" ? "transparent" : T.bg,
+      border: `2px solid ${d === "" ? "transparent" : T.border}`,
+      borderRadius: 18,
+      padding: "16px 0",
+      fontSize: 20,
+      fontWeight: 900,
+      color: T.text,
+      cursor: d === "" ? "default" : "pointer",
+      fontFamily: FONT_PRINT
+    }
+  }, d))), /*#__PURE__*/React.createElement("button", {
+    onClick: onCancel,
+    style: {
+      width: "100%",
+      background: "none",
+      border: `2px solid ${T.border}`,
+      borderRadius: 14,
+      padding: "12px 0",
+      cursor: "pointer",
+      fontSize: 15,
+      fontWeight: 800,
+      color: T.muted,
+      fontFamily: FONT_PRINT
+    }
+  }, "Cancelar")));
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // LEVEL MAP
 // ═══════════════════════════════════════════════════════════════════
-function LevelMap({store,onSelect,onCaseChange,onAdminUnlock,isUnlocked}) {
-  const {speak}=useTTS();
-  const [pinModal,setPinModal]=useState(null); // {levelId, levelTitle}
+function LevelMap({
+  store,
+  onSelect,
+  onCaseChange,
+  onAdminUnlock,
+  isUnlocked
+}) {
+  const {
+    speak
+  } = useTTS();
+  const [pinModal, setPinModal] = useState(null); // {levelId, levelTitle}
 
-  useEffect(()=>{
-    const t=setTimeout(()=>speak("¡Hola campeón! Elige tu misión de lectura.",{rate:0.88}),600);
-    return()=>clearTimeout(t);
-  },[]);
-
-  return (
-    <>
-    {pinModal&&(
-      <AdminPinModal
-        levelTitle={pinModal.levelTitle}
-        onSuccess={()=>{onAdminUnlock(pinModal.levelId);setPinModal(null);}}
-        onCancel={()=>setPinModal(null)}
-      />
-    )}
-    <div style={{padding:"16px 14px 32px"}}>
-      <div style={{textAlign:"center",marginBottom:20,background:"linear-gradient(135deg,#06B6D4,#8B5CF6)",borderRadius:28,padding:"26px 20px 22px",boxShadow:"0 8px 32px #06B6D455"}}>
-        <div style={{fontSize:52,marginBottom:4}}>🦸</div>
-        <h1 style={{fontSize:22,color:"white",fontWeight:900,margin:0,fontFamily:FONT_PRINT}}>¡Hola, Campeón!</h1>
-        <p style={{color:"#E0F2FE",fontSize:13,marginTop:4}}>Elige tu misión de lectura</p>
-        <div style={{marginTop:14,display:"flex",justifyContent:"center",alignItems:"center",gap:10}}>
-          <span style={{color:"#BAE6FD",fontSize:13,fontWeight:800}}>Tipo de letra:</span>
-          <CaseToggle mode={store.caseMode} onChange={onCaseChange}/>
-        </div>
-        <div style={{display:"flex",justifyContent:"center",gap:16,marginTop:16}}>
-          {[{icon:"⭐",val:store.stars,label:"Estrellas"},{icon:"🏆",val:store.completed.length,label:"Completados"},{icon:"📚",val:LEVELS.length,label:"Niveles"}].map(s=>(
-            <div key={s.label} style={{background:"rgba(255,255,255,.18)",borderRadius:14,padding:"9px 16px"}}>
-              <div style={{fontSize:20}}>{s.icon}</div>
-              <div style={{color:"white",fontWeight:900,fontSize:16}}>{s.val}</div>
-              <div style={{color:"#BAE6FD",fontSize:11}}>{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <Card style={{marginBottom:18}}>
-        <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
-          <span style={{fontWeight:900,color:T.text,fontSize:14}}>Progreso total</span>
-          <span style={{fontWeight:900,color:"#06B6D4"}}>{store.completed.length}/{LEVELS.length}</span>
-        </div>
-        <ProgressBar value={store.completed.length} max={LEVELS.length} color="#06B6D4"/>
-      </Card>
-
-      {LEVELS.map(level=>{
-        const unlocked=isUnlocked(level.id);
-        const completed=store.completed.includes(level.id);
-        const lvlStars=store.starsPerLevel[level.id]||0;
-        return (
-          <button key={level.id}
-            onClick={()=>{
-              if(unlocked){
-                speak(`Nivel ${level.id}. ${level.title}`,{rate:0.88});
-                onSelect(level.id);
-              } else {
-                setPinModal({levelId:level.id,levelTitle:`Nivel ${level.id} · ${level.title}`});
-              }
-            }}
-            style={{display:"flex",alignItems:"center",gap:14,width:"100%",
-              background:completed?`${level.color}12`:T.card,
-              border:`2.5px solid ${completed?level.color:unlocked?level.color+"55":T.border}`,
-              borderRadius:22,padding:"15px 16px",cursor:"pointer",
-              textAlign:"left",fontFamily:FONT_PRINT,marginBottom:10,
-              boxShadow:unlocked?`0 4px 18px ${level.color}18`:"none",
-              opacity:unlocked?1:0.5,transition:"transform 0.15s,box-shadow 0.15s",}}
-            onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-2px)";e.currentTarget.style.boxShadow=`0 8px 26px ${level.color}33`;}}
-            onMouseLeave={e=>{e.currentTarget.style.transform="translateY(0)";e.currentTarget.style.boxShadow=unlocked?`0 4px 18px ${level.color}18`:"none";}}
-          >
-            <div style={{width:44,height:44,borderRadius:"50%",flexShrink:0,background:unlocked?level.color:T.border,display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,boxShadow:unlocked?`0 3px 10px ${level.color}44`:"none"}}>
-              {unlocked?level.icon:"🔒"}
-            </div>
-            <div style={{flex:1}}>
-              <div style={{fontWeight:900,color:unlocked?T.text:T.muted,fontSize:15,fontFamily:FONT_PRINT}}>Nivel {level.id} · {level.title}</div>
-              <div style={{fontSize:12,color:T.muted,marginTop:1}}>{level.subtitle}</div>
-              {!unlocked&&<div style={{fontSize:11,color:"#F59E0B",fontWeight:700,marginTop:2}}>🔑 Toca para desbloquear (código admin)</div>}
-              {completed&&<Stars count={lvlStars}/>}
-            </div>
-            <div style={{fontSize:20,color:unlocked?level.color:T.border}}>{completed?"✅":unlocked?"▶️":"🔒"}</div>
-          </button>
-        );
-      })}
-    </div>
-    </>
-  );
+  useEffect(() => {
+    const t = setTimeout(() => speak("¡Hola campeón! Elige tu misión de lectura.", {
+      rate: 0.88
+    }), 600);
+    return () => clearTimeout(t);
+  }, []);
+  return /*#__PURE__*/React.createElement(React.Fragment, null, pinModal && /*#__PURE__*/React.createElement(AdminPinModal, {
+    levelTitle: pinModal.levelTitle,
+    onSuccess: () => {
+      onAdminUnlock(pinModal.levelId);
+      setPinModal(null);
+    },
+    onCancel: () => setPinModal(null)
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "16px 14px 32px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      marginBottom: 20,
+      background: "linear-gradient(135deg,#06B6D4,#8B5CF6)",
+      borderRadius: 28,
+      padding: "26px 20px 22px",
+      boxShadow: "0 8px 32px #06B6D455"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 52,
+      marginBottom: 4
+    }
+  }, "\uD83E\uDDB8"), /*#__PURE__*/React.createElement("h1", {
+    style: {
+      fontSize: 22,
+      color: "white",
+      fontWeight: 900,
+      margin: 0,
+      fontFamily: FONT_PRINT
+    }
+  }, "\xA1Hola, Campe\xF3n!"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: "#E0F2FE",
+      fontSize: 13,
+      marginTop: 4
+    }
+  }, "Elige tu misi\xF3n de lectura"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 14,
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "#BAE6FD",
+      fontSize: 13,
+      fontWeight: 800
+    }
+  }, "Tipo de letra:"), /*#__PURE__*/React.createElement(CaseToggle, {
+    mode: store.caseMode,
+    onChange: onCaseChange
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "center",
+      gap: 16,
+      marginTop: 16
+    }
+  }, [{
+    icon: "⭐",
+    val: store.stars,
+    label: "Estrellas"
+  }, {
+    icon: "🏆",
+    val: store.completed.length,
+    label: "Completados"
+  }, {
+    icon: "📚",
+    val: LEVELS.length,
+    label: "Niveles"
+  }].map(s => /*#__PURE__*/React.createElement("div", {
+    key: s.label,
+    style: {
+      background: "rgba(255,255,255,.18)",
+      borderRadius: 14,
+      padding: "9px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20
+    }
+  }, s.icon), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "white",
+      fontWeight: 900,
+      fontSize: 16
+    }
+  }, s.val), /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "#BAE6FD",
+      fontSize: 11
+    }
+  }, s.label))))), /*#__PURE__*/React.createElement(Card, {
+    style: {
+      marginBottom: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 900,
+      color: T.text,
+      fontSize: 14
+    }
+  }, "Progreso total"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 900,
+      color: "#06B6D4"
+    }
+  }, store.completed.length, "/", LEVELS.length)), /*#__PURE__*/React.createElement(ProgressBar, {
+    value: store.completed.length,
+    max: LEVELS.length,
+    color: "#06B6D4"
+  })), LEVELS.map(level => {
+    const unlocked = isUnlocked(level.id);
+    const completed = store.completed.includes(level.id);
+    const lvlStars = store.starsPerLevel[level.id] || 0;
+    return /*#__PURE__*/React.createElement("button", {
+      key: level.id,
+      onClick: () => {
+        if (unlocked) {
+          speak(`Nivel ${level.id}. ${level.title}`, {
+            rate: 0.88
+          });
+          onSelect(level.id);
+        } else {
+          setPinModal({
+            levelId: level.id,
+            levelTitle: `Nivel ${level.id} · ${level.title}`
+          });
+        }
+      },
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        width: "100%",
+        background: completed ? `${level.color}12` : T.card,
+        border: `2.5px solid ${completed ? level.color : unlocked ? level.color + "55" : T.border}`,
+        borderRadius: 22,
+        padding: "15px 16px",
+        cursor: "pointer",
+        textAlign: "left",
+        fontFamily: FONT_PRINT,
+        marginBottom: 10,
+        boxShadow: unlocked ? `0 4px 18px ${level.color}18` : "none",
+        opacity: unlocked ? 1 : 0.5,
+        transition: "transform 0.15s,box-shadow 0.15s"
+      },
+      onMouseEnter: e => {
+        e.currentTarget.style.transform = "translateY(-2px)";
+        e.currentTarget.style.boxShadow = `0 8px 26px ${level.color}33`;
+      },
+      onMouseLeave: e => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = unlocked ? `0 4px 18px ${level.color}18` : "none";
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        width: 44,
+        height: 44,
+        borderRadius: "50%",
+        flexShrink: 0,
+        background: unlocked ? level.color : T.border,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: 22,
+        boxShadow: unlocked ? `0 3px 10px ${level.color}44` : "none"
+      }
+    }, unlocked ? level.icon : "🔒"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontWeight: 900,
+        color: unlocked ? T.text : T.muted,
+        fontSize: 15,
+        fontFamily: FONT_PRINT
+      }
+    }, "Nivel ", level.id, " \xB7 ", level.title), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 12,
+        color: T.muted,
+        marginTop: 1
+      }
+    }, level.subtitle), !unlocked && /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 11,
+        color: "#F59E0B",
+        fontWeight: 700,
+        marginTop: 2
+      }
+    }, "\uD83D\uDD11 Toca para desbloquear (c\xF3digo admin)"), completed && /*#__PURE__*/React.createElement(Stars, {
+      count: lvlStars
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 20,
+        color: unlocked ? level.color : T.border
+      }
+    }, completed ? "✅" : unlocked ? "▶️" : "🔒"));
+  })));
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // LESSON ROUTER — passes showSylNums flag
 // ═══════════════════════════════════════════════════════════════════
-function LessonRouter({levelId,store,onComplete,onBack}) {
-  const level=LEVELS.find(l=>l.id===levelId);
-  if(!level) return null;
+function LessonRouter({
+  levelId,
+  store,
+  onComplete,
+  onBack
+}) {
+  const level = LEVELS.find(l => l.id === levelId);
+  if (!level) return null;
   // Show syl numbers only on words/words3 levels 2,3,5,6,9 (bisílabas y trisílabas iniciales)
-  const showSylNums=[2,3,5,6,9].includes(level.id);
-  const p={level,caseMode:store.caseMode,onComplete,onBack,showSylNums};
-  switch(level.type){
-    case "syllables": return <SyllablesLesson {...p}/>;
-    case "words":     return <WordsLesson     {...p}/>;
-    case "words3":    return <Words3Lesson    {...p}/>;
-    case "phrases":   return <PhrasesLesson   {...p}/>;
-    case "reading":   return <ReadingLesson   {...p}/>;
-    case "dictation": return <DictationLesson {...p}/>;
-    default: return null;
+  const showSylNums = [2, 3, 5, 6, 9].includes(level.id);
+  const p = {
+    level,
+    caseMode: store.caseMode,
+    onComplete,
+    onBack,
+    showSylNums
+  };
+  switch (level.type) {
+    case "syllables":
+      return /*#__PURE__*/React.createElement(SyllablesLesson, p);
+    case "words":
+      return /*#__PURE__*/React.createElement(WordsLesson, p);
+    case "words3":
+      return /*#__PURE__*/React.createElement(Words3Lesson, p);
+    case "phrases":
+      return /*#__PURE__*/React.createElement(PhrasesLesson, p);
+    case "reading":
+      return /*#__PURE__*/React.createElement(ReadingLesson, p);
+    case "dictation":
+      return /*#__PURE__*/React.createElement(DictationLesson, p);
+    default:
+      return null;
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // SYLLABLES LESSON
 // ═══════════════════════════════════════════════════════════════════
-function SyllablesLesson({level,caseMode,onComplete,onBack}) {
-  const CHUNK=5;
-  const [allSyls]=useState(()=>shuffle(level.syllables));
-  const totalChunks=Math.ceil(allSyls.length/CHUNK);
-  const [chunkIdx,setChunkIdx]=useState(0);
-  const [revealed,setRevealed]=useState(0);
-  const [conf,setConf]=useState(false);
-  const {speak}=useTTS();
-  const chunk=allSyls.slice(chunkIdx*CHUNK,(chunkIdx+1)*CHUNK);
-  const allDone=revealed>=chunk.length;
-
+function SyllablesLesson({
+  level,
+  caseMode,
+  onComplete,
+  onBack
+}) {
+  const CHUNK = 5;
+  const [allSyls] = useState(() => shuffle(level.syllables));
+  const totalChunks = Math.ceil(allSyls.length / CHUNK);
+  const [chunkIdx, setChunkIdx] = useState(0);
+  const [revealed, setRevealed] = useState(0);
+  const [conf, setConf] = useState(false);
+  const {
+    speak
+  } = useTTS();
+  const chunk = allSyls.slice(chunkIdx * CHUNK, (chunkIdx + 1) * CHUNK);
+  const allDone = revealed >= chunk.length;
   function revealOne() {
-    const n=revealed+1;setRevealed(n);
-    if(n>=chunk.length){setConf(true);setTimeout(()=>setConf(false),1500);}
+    const n = revealed + 1;
+    setRevealed(n);
+    if (n >= chunk.length) {
+      setConf(true);
+      setTimeout(() => setConf(false), 1500);
+    }
   }
   function nextChunk() {
-    if(chunkIdx+1>=totalChunks) onComplete(3);
-    else{setChunkIdx(c=>c+1);setRevealed(0);}
+    if (chunkIdx + 1 >= totalChunks) onComplete(3);else {
+      setChunkIdx(c => c + 1);
+      setRevealed(0);
+    }
   }
-
-  return (
-    <div style={{padding:16}}>
-      <Confetti active={conf}/>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-        <BackBtn onClick={onBack}/>
-        <span style={{fontWeight:900,fontSize:13,color:T.muted}}>Grupo {chunkIdx+1}/{totalChunks}</span>
-      </div>
-      <ProgressBar value={chunkIdx} max={totalChunks} color={level.color} h={12}/>
-      <Card style={{textAlign:"center",margin:"16px 0",paddingTop:28,paddingBottom:28}}>
-        <p style={{color:level.color,fontWeight:900,fontSize:14,marginBottom:20}}>
-          {level.isInverse?"🔄 Sílabas inversas":"🔤 Sílabas"} — ¡lee cada una en voz alta!
-        </p>
-        <div style={{display:"flex",flexWrap:"wrap",gap:12,justifyContent:"center",marginBottom:20}}>
-          {chunk.map((s,i)=>{
-            const isDone=i<revealed;
-            const isCurrent=i===revealed&&!allDone;
-            return (
-              <div key={i} style={{
-                minWidth:76,padding:"14px 16px",borderRadius:18,
-                background:isDone?`linear-gradient(135deg,${level.color},${level.color}99)`:isCurrent?T.card:T.border,
-                color:isDone?"white":isCurrent?level.color:"#CBD5E0",
-                boxShadow:isCurrent?`0 0 0 3px ${level.color}55,0 6px 22px ${level.color}33`:isDone?`0 5px 18px ${level.color}44`:"none",
-                border:isCurrent?`3px solid ${level.color}`:"3px solid transparent",
-                transition:"all 0.35s",transform:(isDone||isCurrent)?"scale(1.08)":"scale(1)",
-                cursor:isDone?"pointer":"default",
-              }} onClick={()=>{if(isDone)speak(s.toLowerCase(),{rate:0.75});}}>
-                {isDone||isCurrent?<DisplayText text={s} mode={caseMode} style={{fontSize:32}}/>:<span style={{fontSize:32}}>·</span>}
-              </div>
-            );
-          })}
-        </div>
-        {!allDone&&revealed<chunk.length&&(
-          <div style={{marginBottom:14}}>
-            <SpeakBtn color={level.color} onPress={()=>speak(chunk[revealed].toLowerCase(),{rate:0.72})} label="🔊 Escuchar sílaba"/>
-          </div>
-        )}
-        <p style={{color:T.muted,fontSize:13}}>
-          {revealed===0?"Pulsa ➡️ para descubrir y di la sílaba en voz alta":
-           !allDone?"¡Di la sílaba en voz alta! Pulsa 🔊 si quieres escucharla":
-           "¡Ahora léelas todas de nuevo! 🚀"}
-        </p>
-      </Card>
-      <div style={{textAlign:"center"}}>
-        {!allDone
-          ?<Btn color={level.color} size="lg" onClick={revealOne}>{revealed===0?"➡️ Ver primera sílaba":"➡️ Siguiente sílaba"}</Btn>
-          :<Btn color="#22C55E" size="lg" onClick={nextChunk}>{chunkIdx+1>=totalChunks?"🏆 ¡He terminado!":"✅ ¡Siguiente grupo!"}</Btn>
-        }
-      </div>
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement(Confetti, {
+    active: conf
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement(BackBtn, {
+    onClick: onBack
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 900,
+      fontSize: 13,
+      color: T.muted
+    }
+  }, "Grupo ", chunkIdx + 1, "/", totalChunks)), /*#__PURE__*/React.createElement(ProgressBar, {
+    value: chunkIdx,
+    max: totalChunks,
+    color: level.color,
+    h: 12
+  }), /*#__PURE__*/React.createElement(Card, {
+    style: {
+      textAlign: "center",
+      margin: "16px 0",
+      paddingTop: 28,
+      paddingBottom: 28
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: level.color,
+      fontWeight: 900,
+      fontSize: 14,
+      marginBottom: 20
+    }
+  }, level.isInverse ? "🔄 Sílabas inversas" : "🔤 Sílabas", " \u2014 \xA1lee cada una en voz alta!"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 12,
+      justifyContent: "center",
+      marginBottom: 20
+    }
+  }, chunk.map((s, i) => {
+    const isDone = i < revealed;
+    const isCurrent = i === revealed && !allDone;
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        minWidth: 76,
+        padding: "14px 16px",
+        borderRadius: 18,
+        background: isDone ? `linear-gradient(135deg,${level.color},${level.color}99)` : isCurrent ? T.card : T.border,
+        color: isDone ? "white" : isCurrent ? level.color : "#CBD5E0",
+        boxShadow: isCurrent ? `0 0 0 3px ${level.color}55,0 6px 22px ${level.color}33` : isDone ? `0 5px 18px ${level.color}44` : "none",
+        border: isCurrent ? `3px solid ${level.color}` : "3px solid transparent",
+        transition: "all 0.35s",
+        transform: isDone || isCurrent ? "scale(1.08)" : "scale(1)",
+        cursor: isDone ? "pointer" : "default"
+      },
+      onClick: () => {
+        if (isDone) speak(s.toLowerCase(), {
+          rate: 0.75
+        });
+      }
+    }, isDone || isCurrent ? /*#__PURE__*/React.createElement(DisplayText, {
+      text: s,
+      mode: caseMode,
+      style: {
+        fontSize: 32
+      }
+    }) : /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 32
+      }
+    }, "\xB7"));
+  })), !allDone && revealed < chunk.length && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement(SpeakBtn, {
+    color: level.color,
+    onPress: () => speak(chunk[revealed].toLowerCase(), {
+      rate: 0.72
+    }),
+    label: "\uD83D\uDD0A Escuchar s\xEDlaba"
+  })), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: T.muted,
+      fontSize: 13
+    }
+  }, revealed === 0 ? "Pulsa ➡️ para descubrir y di la sílaba en voz alta" : !allDone ? "¡Di la sílaba en voz alta! Pulsa 🔊 si quieres escucharla" : "¡Ahora léelas todas de nuevo! 🚀")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, !allDone ? /*#__PURE__*/React.createElement(Btn, {
+    color: level.color,
+    size: "lg",
+    onClick: revealOne
+  }, revealed === 0 ? "➡️ Ver primera sílaba" : "➡️ Siguiente sílaba") : /*#__PURE__*/React.createElement(Btn, {
+    color: "#22C55E",
+    size: "lg",
+    onClick: nextChunk
+  }, chunkIdx + 1 >= totalChunks ? "🏆 ¡He terminado!" : "✅ ¡Siguiente grupo!")));
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // WORDS LESSON — bisílabas
 // ═══════════════════════════════════════════════════════════════════
-function WordsLesson({level,caseMode,onComplete,onBack,showSylNums}) {
-  const [queue,setQueue]=useState(()=>shuffle(level.words));
-  const [errorMap,setErrorMap]=useState({});
-  const [idx,setIdx]=useState(0);
-  const [phase,setPhase]=useState("syl1"); // syl1|loading|syl2|answer
-  const [loading,setLoading]=useState(false);
-  const [msg,setMsg]=useState("");
-  const [msgType,setMsgType]=useState("");
-  const [conf,setConf]=useState(false);
-  const [correctCount,setCorrectCount]=useState(0);
-  const {speak,cheer}=useTTS();
-  const item=queue[idx];
-  if(!item) return null;
-
-  function handleCorrect(){
-    const m=pick(MSG_OK);setMsg(m);setMsgType("ok");setConf(true);
-    cheer(m.replace(/[🌟🎉⭐🏆🚀💥🔥]/g,""));
-    const cc=correctCount+1;setCorrectCount(cc);
-    setTimeout(()=>{
-      setConf(false);setMsg("");
-      if(idx+1>=queue.length){const s=cc>=queue.length*0.9?3:cc>=queue.length*0.6?2:1;onComplete(s);}
-      else{setIdx(i=>i+1);setPhase("syl1");}
-    },1700);
+function WordsLesson({
+  level,
+  caseMode,
+  onComplete,
+  onBack,
+  showSylNums
+}) {
+  const [queue, setQueue] = useState(() => shuffle(level.words));
+  const [errorMap, setErrorMap] = useState({});
+  const [idx, setIdx] = useState(0);
+  const [phase, setPhase] = useState("syl1"); // syl1|loading|syl2|answer
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [msgType, setMsgType] = useState("");
+  const [conf, setConf] = useState(false);
+  const [correctCount, setCorrectCount] = useState(0);
+  const {
+    speak,
+    cheer
+  } = useTTS();
+  const item = queue[idx];
+  if (!item) return null;
+  function handleCorrect() {
+    const m = pick(MSG_OK);
+    setMsg(m);
+    setMsgType("ok");
+    setConf(true);
+    cheer(m.replace(/[🌟🎉⭐🏆🚀💥🔥]/g, ""));
+    const cc = correctCount + 1;
+    setCorrectCount(cc);
+    setTimeout(() => {
+      setConf(false);
+      setMsg("");
+      if (idx + 1 >= queue.length) {
+        const s = cc >= queue.length * 0.9 ? 3 : cc >= queue.length * 0.6 ? 2 : 1;
+        onComplete(s);
+      } else {
+        setIdx(i => i + 1);
+        setPhase("syl1");
+      }
+    }, 1700);
   }
-  function handleWrong(){
-    const errs=(errorMap[item.w]||0)+1;
-    setErrorMap(m=>({...m,[item.w]:errs}));
-    const m=pick(MSG_FAIL);setMsg(m);setMsgType("fail");
-    if(errs>=2) setQueue(q=>[...q,item]);
-    setTimeout(()=>{setMsg("");setPhase("syl1");},2000);
+  function handleWrong() {
+    const errs = (errorMap[item.w] || 0) + 1;
+    setErrorMap(m => ({
+      ...m,
+      [item.w]: errs
+    }));
+    const m = pick(MSG_FAIL);
+    setMsg(m);
+    setMsgType("fail");
+    if (errs >= 2) setQueue(q => [...q, item]);
+    setTimeout(() => {
+      setMsg("");
+      setPhase("syl1");
+    }, 2000);
   }
-  function knowIt(){setPhase("loading");setLoading(true);}
-  function loadDone(){setLoading(false);setPhase(item.mono?"answer":"syl2");}
-  function readBoth(){setPhase("answer");}
-
-  return (
-    <div style={{padding:16}}>
-      <Confetti active={conf}/>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:14}}>
-        <BackBtn onClick={onBack}/>
-        <div style={{flex:1}}><ProgressBar value={idx} max={queue.length} color={level.color} h={12}/></div>
-        <span style={{fontSize:13,fontWeight:700,color:T.muted,flexShrink:0}}>{idx}/{queue.length}</span>
-      </div>
-      <Card style={{textAlign:"center",margin:"12px 0 14px",minHeight:180,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-        <div style={{display:"flex",gap:10,justifyContent:"center",alignItems:"center",marginBottom:10}}>
-          {/* Syl 1 */}
-          <div style={{minWidth:82,padding:"15px 18px",borderRadius:20,background:`linear-gradient(135deg,${level.color},${level.color}cc)`,color:"white",boxShadow:`0 6px 20px ${level.color}44`,position:"relative"}}>
-            <SylNum n={1} visible={showSylNums}/>
-            <DisplayText text={item.s1} mode={caseMode} style={{fontSize:38}}/>
-          </div>
-          {/* Syl 2 */}
-          {!item.mono&&(
-            <div style={{minWidth:82,padding:"15px 18px",borderRadius:20,position:"relative",
-              background:phase==="syl2"||phase==="answer"?"linear-gradient(135deg,#F97316,#FBBF24)":T.border,
-              color:phase==="syl2"||phase==="answer"?"white":"#94A3B8",
-              boxShadow:phase==="syl2"||phase==="answer"?"0 6px 20px #F9731644":"none",
-              transition:"all 0.4s cubic-bezier(.4,0,.2,1)"}}>
-              {(phase==="syl2"||phase==="answer")&&<SylNum n={2} visible={showSylNums}/>}
-              {phase==="syl2"||phase==="answer"
-                ?<DisplayText text={item.s2} mode={caseMode} style={{fontSize:38}}/>
-                :<span style={{fontSize:38,fontWeight:900}}>?</span>}
-            </div>
-          )}
-        </div>
-        {(phase==="syl2"||phase==="answer")&&(
-          <div style={{marginBottom:8}}>
-            <SpeakBtn color={level.color} onPress={()=>speak(item.tts,{rate:0.72})} label="🔊 Escuchar palabra"/>
-          </div>
-        )}
-        <SlowBar active={loading} onDone={loadDone}/>
-        {phase==="syl1"&&<p style={{color:T.muted,fontSize:13,marginTop:6}}>Lee la sílaba y pulsa "¡Ya la sé!" 👀</p>}
-        {phase==="syl2"&&<p style={{color:level.color,fontSize:14,fontWeight:900,marginTop:6}}>¡Lee las dos juntas! → <DisplayText text={item.w} mode={caseMode} style={{fontSize:18}}/></p>}
-        {phase==="answer"&&<p style={{color:"#166534",fontSize:14,fontWeight:900,marginTop:6}}>✅ <DisplayText text={item.w} mode={caseMode} style={{fontSize:18}}/> — ¿Cuál es la imagen?</p>}
-      </Card>
-      <FeedbackBanner msg={msg} type={msgType}/>
-      {phase==="syl1"&&<div style={{textAlign:"center"}}><Btn color={level.color} size="lg" onClick={knowIt}>👍 ¡Ya la sé!</Btn></div>}
-      {phase==="syl2"&&<div style={{textAlign:"center"}}><Btn color="#22C55E" size="lg" onClick={readBoth}>✅ ¡He leído las dos!</Btn></div>}
-      {phase==="answer"&&!msg&&(
-        <div>
-          <p style={{textAlign:"center",fontWeight:900,color:T.text,marginBottom:12,fontSize:15}}>
-            ¿Cuál de estas es <DisplayText text={`"${item.w}"`} mode={caseMode} style={{color:level.color,fontSize:16}}/>?
-          </p>
-          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            {item.opts.map((o,i)=>(
-              <button key={i} onClick={()=>i===item.c?handleCorrect():handleWrong()} style={{
-                background:T.card,border:`3px solid ${T.border}`,borderRadius:22,padding:"16px 14px",
-                cursor:"pointer",fontSize:16,fontWeight:800,color:T.text,minWidth:110,fontFamily:FONT_PRINT,
-                transition:"transform 0.15s,border-color 0.15s"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor=level.color;e.currentTarget.style.transform="scale(1.07)";}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor=T.border;e.currentTarget.style.transform="scale(1)";}}
-              >{o}</button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  function knowIt() {
+    setPhase("loading");
+    setLoading(true);
+  }
+  function loadDone() {
+    setLoading(false);
+    setPhase(item.mono ? "answer" : "syl2");
+  }
+  function readBoth() {
+    setPhase("answer");
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement(Confetti, {
+    active: conf
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement(BackBtn, {
+    onClick: onBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement(ProgressBar, {
+    value: idx,
+    max: queue.length,
+    color: level.color,
+    h: 12
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: T.muted,
+      flexShrink: 0
+    }
+  }, idx, "/", queue.length)), /*#__PURE__*/React.createElement(Card, {
+    style: {
+      textAlign: "center",
+      margin: "12px 0 14px",
+      minHeight: 180,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      minWidth: 82,
+      padding: "15px 18px",
+      borderRadius: 20,
+      background: `linear-gradient(135deg,${level.color},${level.color}cc)`,
+      color: "white",
+      boxShadow: `0 6px 20px ${level.color}44`,
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement(SylNum, {
+    n: 1,
+    visible: showSylNums
+  }), /*#__PURE__*/React.createElement(DisplayText, {
+    text: item.s1,
+    mode: caseMode,
+    style: {
+      fontSize: 38
+    }
+  })), !item.mono && /*#__PURE__*/React.createElement("div", {
+    style: {
+      minWidth: 82,
+      padding: "15px 18px",
+      borderRadius: 20,
+      position: "relative",
+      background: phase === "syl2" || phase === "answer" ? "linear-gradient(135deg,#F97316,#FBBF24)" : T.border,
+      color: phase === "syl2" || phase === "answer" ? "white" : "#94A3B8",
+      boxShadow: phase === "syl2" || phase === "answer" ? "0 6px 20px #F9731644" : "none",
+      transition: "all 0.4s cubic-bezier(.4,0,.2,1)"
+    }
+  }, (phase === "syl2" || phase === "answer") && /*#__PURE__*/React.createElement(SylNum, {
+    n: 2,
+    visible: showSylNums
+  }), phase === "syl2" || phase === "answer" ? /*#__PURE__*/React.createElement(DisplayText, {
+    text: item.s2,
+    mode: caseMode,
+    style: {
+      fontSize: 38
+    }
+  }) : /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 38,
+      fontWeight: 900
+    }
+  }, "?"))), (phase === "syl2" || phase === "answer") && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement(SpeakBtn, {
+    color: level.color,
+    onPress: () => speak(item.tts, {
+      rate: 0.72
+    }),
+    label: "\uD83D\uDD0A Escuchar palabra"
+  })), /*#__PURE__*/React.createElement(SlowBar, {
+    active: loading,
+    onDone: loadDone
+  }), phase === "syl1" && /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: T.muted,
+      fontSize: 13,
+      marginTop: 6
+    }
+  }, "Lee la s\xEDlaba y pulsa \"\xA1Ya la s\xE9!\" \uD83D\uDC40"), phase === "syl2" && /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: level.color,
+      fontSize: 14,
+      fontWeight: 900,
+      marginTop: 6
+    }
+  }, "\xA1Lee las dos juntas! \u2192 ", /*#__PURE__*/React.createElement(DisplayText, {
+    text: item.w,
+    mode: caseMode,
+    style: {
+      fontSize: 18
+    }
+  })), phase === "answer" && /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: "#166534",
+      fontSize: 14,
+      fontWeight: 900,
+      marginTop: 6
+    }
+  }, "\u2705 ", /*#__PURE__*/React.createElement(DisplayText, {
+    text: item.w,
+    mode: caseMode,
+    style: {
+      fontSize: 18
+    }
+  }), " \u2014 \xBFCu\xE1l es la imagen?")), /*#__PURE__*/React.createElement(FeedbackBanner, {
+    msg: msg,
+    type: msgType
+  }), phase === "syl1" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    color: level.color,
+    size: "lg",
+    onClick: knowIt
+  }, "\uD83D\uDC4D \xA1Ya la s\xE9!")), phase === "syl2" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    color: "#22C55E",
+    size: "lg",
+    onClick: readBoth
+  }, "\u2705 \xA1He le\xEDdo las dos!")), phase === "answer" && !msg && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: "center",
+      fontWeight: 900,
+      color: T.text,
+      marginBottom: 12,
+      fontSize: 15
+    }
+  }, "\xBFCu\xE1l de estas es ", /*#__PURE__*/React.createElement(DisplayText, {
+    text: `"${item.w}"`,
+    mode: caseMode,
+    style: {
+      color: level.color,
+      fontSize: 16
+    }
+  }), "?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      justifyContent: "center",
+      flexWrap: "wrap"
+    }
+  }, item.opts.map((o, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    onClick: () => i === item.c ? handleCorrect() : handleWrong(),
+    style: {
+      background: T.card,
+      border: `3px solid ${T.border}`,
+      borderRadius: 22,
+      padding: "16px 14px",
+      cursor: "pointer",
+      fontSize: 16,
+      fontWeight: 800,
+      color: T.text,
+      minWidth: 110,
+      fontFamily: FONT_PRINT,
+      transition: "transform 0.15s,border-color 0.15s"
+    },
+    onMouseEnter: e => {
+      e.currentTarget.style.borderColor = level.color;
+      e.currentTarget.style.transform = "scale(1.07)";
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.borderColor = T.border;
+      e.currentTarget.style.transform = "scale(1)";
+    }
+  }, o)))));
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // WORDS3 LESSON — trisílabas — FIXED state machine
 // ═══════════════════════════════════════════════════════════════════
-function Words3Lesson({level,caseMode,onComplete,onBack,showSylNums}) {
-  const [queue,setQueue]=useState(()=>shuffle(level.words));
-  const [errorMap,setErrorMap]=useState({});
-  const [idx,setIdx]=useState(0);
+function Words3Lesson({
+  level,
+  caseMode,
+  onComplete,
+  onBack,
+  showSylNums
+}) {
+  const [queue, setQueue] = useState(() => shuffle(level.words));
+  const [errorMap, setErrorMap] = useState({});
+  const [idx, setIdx] = useState(0);
   // phase: "s1" | "s2" | "s3" | "loading" | "answer"
-  const [phase,setPhase]=useState("s1");
-  const [loading,setLoading]=useState(false);
-  const [msg,setMsg]=useState("");
-  const [msgType,setMsgType]=useState("");
-  const [conf,setConf]=useState(false);
-  const [correctCount,setCorrectCount]=useState(0);
-  const {speak,cheer}=useTTS();
-  const item=queue[idx];
-  if(!item) return null;
+  const [phase, setPhase] = useState("s1");
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [msgType, setMsgType] = useState("");
+  const [conf, setConf] = useState(false);
+  const [correctCount, setCorrectCount] = useState(0);
+  const {
+    speak,
+    cheer
+  } = useTTS();
+  const item = queue[idx];
+  if (!item) return null;
 
   // how many syls are visible based on phase
-  const visCount = phase==="s1"?1 : phase==="s2"?2 : 3;
-  const syls=[item.s1,item.s2,item.s3];
-  const sylColors=["linear-gradient(135deg,#06B6D4,#06B6D4cc)","linear-gradient(135deg,#8B5CF6,#8B5CF6cc)","linear-gradient(135deg,#F97316,#FBBF24)"];
-
-  function advance(){
-    if(phase==="s1") setPhase("s2");
-    else if(phase==="s2") setPhase("s3");
-    else if(phase==="s3"){ setPhase("loading"); setLoading(true); }
+  const visCount = phase === "s1" ? 1 : phase === "s2" ? 2 : 3;
+  const syls = [item.s1, item.s2, item.s3];
+  const sylColors = ["linear-gradient(135deg,#06B6D4,#06B6D4cc)", "linear-gradient(135deg,#8B5CF6,#8B5CF6cc)", "linear-gradient(135deg,#F97316,#FBBF24)"];
+  function advance() {
+    if (phase === "s1") setPhase("s2");else if (phase === "s2") setPhase("s3");else if (phase === "s3") {
+      setPhase("loading");
+      setLoading(true);
+    }
   }
-
-  function handleCorrect(){
-    const m=pick(MSG_OK);setMsg(m);setMsgType("ok");setConf(true);
-    cheer(m.replace(/[🌟🎉⭐🏆🚀💥🔥]/g,""));
-    const cc=correctCount+1;setCorrectCount(cc);
-    setTimeout(()=>{
-      setConf(false);setMsg("");
-      if(idx+1>=queue.length){const s=cc>=queue.length*0.9?3:cc>=queue.length*0.6?2:1;onComplete(s);}
-      else{setIdx(i=>i+1);setPhase("s1");}
-    },1700);
+  function handleCorrect() {
+    const m = pick(MSG_OK);
+    setMsg(m);
+    setMsgType("ok");
+    setConf(true);
+    cheer(m.replace(/[🌟🎉⭐🏆🚀💥🔥]/g, ""));
+    const cc = correctCount + 1;
+    setCorrectCount(cc);
+    setTimeout(() => {
+      setConf(false);
+      setMsg("");
+      if (idx + 1 >= queue.length) {
+        const s = cc >= queue.length * 0.9 ? 3 : cc >= queue.length * 0.6 ? 2 : 1;
+        onComplete(s);
+      } else {
+        setIdx(i => i + 1);
+        setPhase("s1");
+      }
+    }, 1700);
   }
-  function handleWrong(){
-    const errs=(errorMap[item.w]||0)+1;
-    setErrorMap(m=>({...m,[item.w]:errs}));
-    const m=pick(MSG_FAIL);setMsg(m);setMsgType("fail");
-    if(errs>=2) setQueue(q=>[...q,item]);
-    setTimeout(()=>{setMsg("");setPhase("s1");},2000);
+  function handleWrong() {
+    const errs = (errorMap[item.w] || 0) + 1;
+    setErrorMap(m => ({
+      ...m,
+      [item.w]: errs
+    }));
+    const m = pick(MSG_FAIL);
+    setMsg(m);
+    setMsgType("fail");
+    if (errs >= 2) setQueue(q => [...q, item]);
+    setTimeout(() => {
+      setMsg("");
+      setPhase("s1");
+    }, 2000);
   }
-
-  const btnLabel = phase==="s1"?"➡️ Segunda sílaba" : phase==="s2"?"➡️ Tercera sílaba" : "✅ ¡Las he leído todas!";
-
-  return (
-    <div style={{padding:16}}>
-      <Confetti active={conf}/>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:14}}>
-        <BackBtn onClick={onBack}/>
-        <div style={{flex:1}}><ProgressBar value={idx} max={queue.length} color={level.color} h={12}/></div>
-        <span style={{fontSize:13,fontWeight:700,color:T.muted,flexShrink:0}}>{idx}/{queue.length}</span>
-      </div>
-      <Card style={{textAlign:"center",margin:"12px 0 14px",minHeight:200,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-        <p style={{color:level.color,fontWeight:900,fontSize:13,marginBottom:14}}>Palabra de 3 sílabas — ¡léelas una a una!</p>
-        <div style={{display:"flex",gap:8,justifyContent:"center",alignItems:"center",marginBottom:12}}>
-          {syls.map((s,i)=>{
-            const vis=i<visCount;
-            return (
-              <div key={i} style={{
-                minWidth:70,padding:"13px 14px",borderRadius:18,position:"relative",
-                background:vis?sylColors[i]:T.border,
-                color:vis?"white":"#CBD5E0",
-                boxShadow:vis?`0 5px 16px rgba(0,0,0,0.18)`:"none",
-                transition:"all 0.4s cubic-bezier(.4,0,.2,1)",
-                transform:vis?"scale(1.06)":"scale(1)",
-              }}>
-                {vis&&<SylNum n={i+1} visible={showSylNums}/>}
-                {vis?<DisplayText text={s} mode={caseMode} style={{fontSize:30}}/>:<span style={{fontSize:30}}>?</span>}
-              </div>
-            );
-          })}
-        </div>
-        {phase==="answer"&&(
-          <div style={{marginBottom:8}}>
-            <SpeakBtn color={level.color} onPress={()=>speak(item.tts,{rate:0.72})} label="🔊 Escuchar palabra"/>
-          </div>
-        )}
-        <SlowBar active={loading} onDone={()=>{setLoading(false);setPhase("answer");}}/>
-        {phase!=="loading"&&phase!=="answer"&&<p style={{color:T.muted,fontSize:13}}>
-          {phase==="s1"?"¡Lee la primera sílaba y pulsa siguiente!":"¡Di esta sílaba y sigue!"}
-        </p>}
-        {phase==="answer"&&<p style={{color:"#166534",fontSize:13,fontWeight:900}}>
-          ✅ <DisplayText text={item.w} mode={caseMode} style={{fontSize:16}}/> — ¿Cuál es?
-        </p>}
-      </Card>
-      <FeedbackBanner msg={msg} type={msgType}/>
-      {(phase==="s1"||phase==="s2"||phase==="s3")&&!loading&&(
-        <div style={{textAlign:"center"}}>
-          <Btn color={level.color} size="lg" onClick={advance}>{btnLabel}</Btn>
-        </div>
-      )}
-      {phase==="answer"&&!msg&&(
-        <div>
-          <p style={{textAlign:"center",fontWeight:900,color:T.text,marginBottom:12,fontSize:15}}>
-            ¿Cuál de estas es <DisplayText text={`"${item.w}"`} mode={caseMode} style={{color:level.color,fontSize:15}}/>?
-          </p>
-          <div style={{display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-            {item.opts.map((o,i)=>(
-              <button key={i} onClick={()=>i===item.c?handleCorrect():handleWrong()} style={{
-                background:T.card,border:`3px solid ${T.border}`,borderRadius:22,padding:"16px 14px",
-                cursor:"pointer",fontSize:15,fontWeight:800,color:T.text,minWidth:110,fontFamily:FONT_PRINT,
-                transition:"transform 0.15s,border-color 0.15s"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor=level.color;e.currentTarget.style.transform="scale(1.07)";}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor=T.border;e.currentTarget.style.transform="scale(1)";}}
-              >{o}</button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  const btnLabel = phase === "s1" ? "➡️ Segunda sílaba" : phase === "s2" ? "➡️ Tercera sílaba" : "✅ ¡Las he leído todas!";
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement(Confetti, {
+    active: conf
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement(BackBtn, {
+    onClick: onBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement(ProgressBar, {
+    value: idx,
+    max: queue.length,
+    color: level.color,
+    h: 12
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: T.muted,
+      flexShrink: 0
+    }
+  }, idx, "/", queue.length)), /*#__PURE__*/React.createElement(Card, {
+    style: {
+      textAlign: "center",
+      margin: "12px 0 14px",
+      minHeight: 200,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: level.color,
+      fontWeight: 900,
+      fontSize: 13,
+      marginBottom: 14
+    }
+  }, "Palabra de 3 s\xEDlabas \u2014 \xA1l\xE9elas una a una!"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 12
+    }
+  }, syls.map((s, i) => {
+    const vis = i < visCount;
+    return /*#__PURE__*/React.createElement("div", {
+      key: i,
+      style: {
+        minWidth: 70,
+        padding: "13px 14px",
+        borderRadius: 18,
+        position: "relative",
+        background: vis ? sylColors[i] : T.border,
+        color: vis ? "white" : "#CBD5E0",
+        boxShadow: vis ? `0 5px 16px rgba(0,0,0,0.18)` : "none",
+        transition: "all 0.4s cubic-bezier(.4,0,.2,1)",
+        transform: vis ? "scale(1.06)" : "scale(1)"
+      }
+    }, vis && /*#__PURE__*/React.createElement(SylNum, {
+      n: i + 1,
+      visible: showSylNums
+    }), vis ? /*#__PURE__*/React.createElement(DisplayText, {
+      text: s,
+      mode: caseMode,
+      style: {
+        fontSize: 30
+      }
+    }) : /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 30
+      }
+    }, "?"));
+  })), phase === "answer" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement(SpeakBtn, {
+    color: level.color,
+    onPress: () => speak(item.tts, {
+      rate: 0.72
+    }),
+    label: "\uD83D\uDD0A Escuchar palabra"
+  })), /*#__PURE__*/React.createElement(SlowBar, {
+    active: loading,
+    onDone: () => {
+      setLoading(false);
+      setPhase("answer");
+    }
+  }), phase !== "loading" && phase !== "answer" && /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: T.muted,
+      fontSize: 13
+    }
+  }, phase === "s1" ? "¡Lee la primera sílaba y pulsa siguiente!" : "¡Di esta sílaba y sigue!"), phase === "answer" && /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: "#166534",
+      fontSize: 13,
+      fontWeight: 900
+    }
+  }, "\u2705 ", /*#__PURE__*/React.createElement(DisplayText, {
+    text: item.w,
+    mode: caseMode,
+    style: {
+      fontSize: 16
+    }
+  }), " \u2014 \xBFCu\xE1l es?")), /*#__PURE__*/React.createElement(FeedbackBanner, {
+    msg: msg,
+    type: msgType
+  }), (phase === "s1" || phase === "s2" || phase === "s3") && !loading && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    color: level.color,
+    size: "lg",
+    onClick: advance
+  }, btnLabel)), phase === "answer" && !msg && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: "center",
+      fontWeight: 900,
+      color: T.text,
+      marginBottom: 12,
+      fontSize: 15
+    }
+  }, "\xBFCu\xE1l de estas es ", /*#__PURE__*/React.createElement(DisplayText, {
+    text: `"${item.w}"`,
+    mode: caseMode,
+    style: {
+      color: level.color,
+      fontSize: 15
+    }
+  }), "?"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      justifyContent: "center",
+      flexWrap: "wrap"
+    }
+  }, item.opts.map((o, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    onClick: () => i === item.c ? handleCorrect() : handleWrong(),
+    style: {
+      background: T.card,
+      border: `3px solid ${T.border}`,
+      borderRadius: 22,
+      padding: "16px 14px",
+      cursor: "pointer",
+      fontSize: 15,
+      fontWeight: 800,
+      color: T.text,
+      minWidth: 110,
+      fontFamily: FONT_PRINT,
+      transition: "transform 0.15s,border-color 0.15s"
+    },
+    onMouseEnter: e => {
+      e.currentTarget.style.borderColor = level.color;
+      e.currentTarget.style.transform = "scale(1.07)";
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.borderColor = T.border;
+      e.currentTarget.style.transform = "scale(1)";
+    }
+  }, o)))));
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // PHRASES LESSON
 // ═══════════════════════════════════════════════════════════════════
-function PhrasesLesson({level,caseMode,onComplete,onBack}) {
-  const [idx,setIdx]=useState(0);
-  const [revealed,setRevealed]=useState(0);
-  const [conf,setConf]=useState(false);
-  const {speak}=useTTS();
-  const item=level.phrases[idx];
-
-  function revealNext(){
-    const n=revealed+1;setRevealed(n);
-    if(n>=item.words.length){setConf(true);setTimeout(()=>{setConf(false);if(idx+1>=level.phrases.length)onComplete(3);else{setIdx(i=>i+1);setRevealed(0);}},1900);}
-  }
-
-  return (
-    <div style={{padding:16}}>
-      <Confetti active={conf}/>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-        <BackBtn onClick={onBack}/>
-        <ProgressBar value={idx} max={level.phrases.length} color={level.color} h={12}/>
-        <span style={{fontSize:13,fontWeight:700,color:T.muted,marginLeft:10}}>{idx+1}/{level.phrases.length}</span>
-      </div>
-      <div style={{textAlign:"center",marginBottom:10}}>
-        <div style={{fontSize:46}}>{item.emoji}</div>
-        <div style={{marginTop:8}}><SpeakBtn color={level.color} onPress={()=>speak(item.tts,{rate:0.80})}/></div>
-      </div>
-      <Card style={{display:"flex",flexWrap:"wrap",gap:12,justifyContent:"center",minHeight:100,alignItems:"center",marginBottom:18}}>
-        {item.words.map((w,i)=>(
-          <div key={i} onClick={()=>{if(i<revealed)speak(w.toLowerCase(),{rate:0.78});}}
-            style={{padding:"12px 20px",borderRadius:18,cursor:i<revealed?"pointer":"default",
-              background:i<revealed?`linear-gradient(135deg,${level.color},${level.color}aa)`:T.border,
-              color:i<revealed?"white":"#94A3B8",
-              boxShadow:i<revealed?`0 5px 14px ${level.color}44`:"none",
-              transition:"all 0.38s",transform:i<revealed?"scale(1.05)":"scale(1)"}}>
-            {i<revealed?<DisplayText text={w} mode={caseMode} style={{fontSize:22}}/>:<span style={{fontSize:22}}>· · ·</span>}
-          </div>
-        ))}
-      </Card>
-      <div style={{textAlign:"center"}}>
-        {revealed<item.words.length
-          ?<Btn color={level.color} size="lg" onClick={revealNext}>{revealed===0?"🚀 ¡Empezar!":"➡️ Siguiente palabra"}</Btn>
-          :<div style={{background:"#DCFCE7",borderRadius:20,padding:"14px 20px",textAlign:"center"}}>
-            <p style={{color:"#166534",fontWeight:900,fontSize:16,marginBottom:8}}>🎤 ¡Lee la frase completa!</p>
-            <DisplayText text={item.phrase} mode={caseMode} style={{fontSize:caseMode==="lower"?24:20,color:"#166534",display:"block"}}/>
-          </div>
+function PhrasesLesson({
+  level,
+  caseMode,
+  onComplete,
+  onBack
+}) {
+  const [idx, setIdx] = useState(0);
+  const [revealed, setRevealed] = useState(0);
+  const [conf, setConf] = useState(false);
+  const {
+    speak
+  } = useTTS();
+  const item = level.phrases[idx];
+  function revealNext() {
+    const n = revealed + 1;
+    setRevealed(n);
+    if (n >= item.words.length) {
+      setConf(true);
+      setTimeout(() => {
+        setConf(false);
+        if (idx + 1 >= level.phrases.length) onComplete(3);else {
+          setIdx(i => i + 1);
+          setRevealed(0);
         }
-      </div>
-    </div>
-  );
+      }, 1900);
+    }
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement(Confetti, {
+    active: conf
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement(BackBtn, {
+    onClick: onBack
+  }), /*#__PURE__*/React.createElement(ProgressBar, {
+    value: idx,
+    max: level.phrases.length,
+    color: level.color,
+    h: 12
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: T.muted,
+      marginLeft: 10
+    }
+  }, idx + 1, "/", level.phrases.length)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 46
+    }
+  }, item.emoji), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8
+    }
+  }, /*#__PURE__*/React.createElement(SpeakBtn, {
+    color: level.color,
+    onPress: () => speak(item.tts, {
+      rate: 0.80
+    })
+  }))), /*#__PURE__*/React.createElement(Card, {
+    style: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 12,
+      justifyContent: "center",
+      minHeight: 100,
+      alignItems: "center",
+      marginBottom: 18
+    }
+  }, item.words.map((w, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    onClick: () => {
+      if (i < revealed) speak(w.toLowerCase(), {
+        rate: 0.78
+      });
+    },
+    style: {
+      padding: "12px 20px",
+      borderRadius: 18,
+      cursor: i < revealed ? "pointer" : "default",
+      background: i < revealed ? `linear-gradient(135deg,${level.color},${level.color}aa)` : T.border,
+      color: i < revealed ? "white" : "#94A3B8",
+      boxShadow: i < revealed ? `0 5px 14px ${level.color}44` : "none",
+      transition: "all 0.38s",
+      transform: i < revealed ? "scale(1.05)" : "scale(1)"
+    }
+  }, i < revealed ? /*#__PURE__*/React.createElement(DisplayText, {
+    text: w,
+    mode: caseMode,
+    style: {
+      fontSize: 22
+    }
+  }) : /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 22
+    }
+  }, "\xB7 \xB7 \xB7")))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, revealed < item.words.length ? /*#__PURE__*/React.createElement(Btn, {
+    color: level.color,
+    size: "lg",
+    onClick: revealNext
+  }, revealed === 0 ? "🚀 ¡Empezar!" : "➡️ Siguiente palabra") : /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#DCFCE7",
+      borderRadius: 20,
+      padding: "14px 20px",
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: "#166534",
+      fontWeight: 900,
+      fontSize: 16,
+      marginBottom: 8
+    }
+  }, "\uD83C\uDFA4 \xA1Lee la frase completa!"), /*#__PURE__*/React.createElement(DisplayText, {
+    text: item.phrase,
+    mode: caseMode,
+    style: {
+      fontSize: caseMode === "lower" ? 24 : 20,
+      color: "#166534",
+      display: "block"
+    }
+  }))));
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // READING LESSON
 // ═══════════════════════════════════════════════════════════════════
-function ReadingLesson({level,caseMode,onComplete,onBack}) {
-  const [tIdx,setTIdx]=useState(0);
-  const [phase,setPhase]=useState("read");
-  const [qIdx,setQIdx]=useState(0);
-  const [msg,setMsg]=useState("");
-  const [msgType,setMsgType]=useState("");
-  const [conf,setConf]=useState(false);
-  const {speak,cheer}=useTTS();
-  const text=level.texts[tIdx];
-
-  function answer(i){
-    const q=text.questions[qIdx];
-    if(i===q.c){
-      const m=pick(MSG_OK);setMsg(m);setMsgType("ok");setConf(true);
-      cheer(m.replace(/[🌟🎉⭐🏆🚀💥🔥]/g,""));
-      setTimeout(()=>{setConf(false);setMsg("");
-        if(qIdx+1>=text.questions.length){if(tIdx+1>=level.texts.length)onComplete(3);else{setTIdx(t=>t+1);setPhase("read");setQIdx(0);}}
-        else setQIdx(q=>q+1);
-      },1600);
+function ReadingLesson({
+  level,
+  caseMode,
+  onComplete,
+  onBack
+}) {
+  const [tIdx, setTIdx] = useState(0);
+  const [phase, setPhase] = useState("read");
+  const [qIdx, setQIdx] = useState(0);
+  const [msg, setMsg] = useState("");
+  const [msgType, setMsgType] = useState("");
+  const [conf, setConf] = useState(false);
+  const {
+    speak,
+    cheer
+  } = useTTS();
+  const text = level.texts[tIdx];
+  function answer(i) {
+    const q = text.questions[qIdx];
+    if (i === q.c) {
+      const m = pick(MSG_OK);
+      setMsg(m);
+      setMsgType("ok");
+      setConf(true);
+      cheer(m.replace(/[🌟🎉⭐🏆🚀💥🔥]/g, ""));
+      setTimeout(() => {
+        setConf(false);
+        setMsg("");
+        if (qIdx + 1 >= text.questions.length) {
+          if (tIdx + 1 >= level.texts.length) onComplete(3);else {
+            setTIdx(t => t + 1);
+            setPhase("read");
+            setQIdx(0);
+          }
+        } else setQIdx(q => q + 1);
+      }, 1600);
     } else {
-      const m=pick(MSG_FAIL);setMsg(m);setMsgType("fail");
-      setTimeout(()=>setMsg(""),2000);
+      const m = pick(MSG_FAIL);
+      setMsg(m);
+      setMsgType("fail");
+      setTimeout(() => setMsg(""), 2000);
     }
   }
-
-  return (
-    <div style={{padding:16}}>
-      <Confetti active={conf}/>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
-        <BackBtn onClick={onBack}/>
-        <span style={{fontWeight:700,fontSize:13,color:T.muted}}>Texto {tIdx+1}/{level.texts.length}</span>
-      </div>
-      <Card style={{marginBottom:14}}>
-        <div style={{fontSize:36,textAlign:"center",marginBottom:8}}>{text.emoji}</div>
-        <h3 style={{color:level.color,fontWeight:900,fontSize:18,marginBottom:10,textAlign:"center",fontFamily:FONT_PRINT}}>{text.title}</h3>
-        {text.text.split("\n").map((line,i)=>(
-          <p key={i} style={{fontSize:18,lineHeight:1.8,fontWeight:700,letterSpacing:0.3,marginBottom:4,fontFamily:caseMode==="lower"?FONT_SCRIPT:FONT_PRINT}}>
-            {caseMode==="lower"?line.toLowerCase():line}
-          </p>
-        ))}
-        <div style={{marginTop:12,textAlign:"center"}}><SpeakBtn color={level.color} onPress={()=>speak(text.tts,{rate:0.80})}/></div>
-      </Card>
-      <FeedbackBanner msg={msg} type={msgType}/>
-      {phase==="read"&&(
-        <div style={{textAlign:"center"}}>
-          <p style={{color:T.muted,fontSize:14,marginBottom:14}}>Lee el texto en voz alta y luego responde 📖</p>
-          <Btn color={level.color} size="lg" onClick={()=>setPhase("quiz")}>❓ ¡Contestar!</Btn>
-        </div>
-      )}
-      {phase==="quiz"&&qIdx<text.questions.length&&!msg&&(
-        <Card>
-          <p style={{fontWeight:900,color:T.text,fontSize:17,marginBottom:6,fontFamily:FONT_PRINT}}>{text.questions[qIdx].q}</p>
-          <div style={{textAlign:"center",marginBottom:10}}><SpeakBtn color={level.color} onPress={()=>speak(text.questions[qIdx].tts,{rate:0.82})}/></div>
-          <div style={{display:"flex",flexDirection:"column",gap:10}}>
-            {text.questions[qIdx].opts.map((o,i)=>(
-              <button key={i} onClick={()=>answer(i)} style={{background:T.bg,border:`2.5px solid ${T.border}`,borderRadius:18,padding:"14px 18px",cursor:"pointer",fontSize:16,fontWeight:800,color:T.text,textAlign:"left",fontFamily:FONT_PRINT,transition:"transform 0.15s,border-color 0.15s"}}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor=level.color;e.currentTarget.style.transform="scale(1.02)";}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor=T.border;e.currentTarget.style.transform="scale(1)";}}
-              ><span style={{color:level.color,marginRight:8}}>{"ABC"[i]})</span>{o}</button>
-            ))}
-          </div>
-        </Card>
-      )}
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement(Confetti, {
+    active: conf
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement(BackBtn, {
+    onClick: onBack
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 700,
+      fontSize: 13,
+      color: T.muted
+    }
+  }, "Texto ", tIdx + 1, "/", level.texts.length)), /*#__PURE__*/React.createElement(Card, {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 36,
+      textAlign: "center",
+      marginBottom: 8
+    }
+  }, text.emoji), /*#__PURE__*/React.createElement("h3", {
+    style: {
+      color: level.color,
+      fontWeight: 900,
+      fontSize: 18,
+      marginBottom: 10,
+      textAlign: "center",
+      fontFamily: FONT_PRINT
+    }
+  }, text.title), text.text.split("\n").map((line, i) => /*#__PURE__*/React.createElement("p", {
+    key: i,
+    style: {
+      fontSize: 18,
+      lineHeight: 1.8,
+      fontWeight: 700,
+      letterSpacing: 0.3,
+      marginBottom: 4,
+      fontFamily: caseMode === "lower" ? FONT_SCRIPT : FONT_PRINT
+    }
+  }, caseMode === "lower" ? line.toLowerCase() : line)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement(SpeakBtn, {
+    color: level.color,
+    onPress: () => speak(text.tts, {
+      rate: 0.80
+    })
+  }))), /*#__PURE__*/React.createElement(FeedbackBanner, {
+    msg: msg,
+    type: msgType
+  }), phase === "read" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: T.muted,
+      fontSize: 14,
+      marginBottom: 14
+    }
+  }, "Lee el texto en voz alta y luego responde \uD83D\uDCD6"), /*#__PURE__*/React.createElement(Btn, {
+    color: level.color,
+    size: "lg",
+    onClick: () => setPhase("quiz")
+  }, "\u2753 \xA1Contestar!")), phase === "quiz" && qIdx < text.questions.length && !msg && /*#__PURE__*/React.createElement(Card, null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontWeight: 900,
+      color: T.text,
+      fontSize: 17,
+      marginBottom: 6,
+      fontFamily: FONT_PRINT
+    }
+  }, text.questions[qIdx].q), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      marginBottom: 10
+    }
+  }, /*#__PURE__*/React.createElement(SpeakBtn, {
+    color: level.color,
+    onPress: () => speak(text.questions[qIdx].tts, {
+      rate: 0.82
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 10
+    }
+  }, text.questions[qIdx].opts.map((o, i) => /*#__PURE__*/React.createElement("button", {
+    key: i,
+    onClick: () => answer(i),
+    style: {
+      background: T.bg,
+      border: `2.5px solid ${T.border}`,
+      borderRadius: 18,
+      padding: "14px 18px",
+      cursor: "pointer",
+      fontSize: 16,
+      fontWeight: 800,
+      color: T.text,
+      textAlign: "left",
+      fontFamily: FONT_PRINT,
+      transition: "transform 0.15s,border-color 0.15s"
+    },
+    onMouseEnter: e => {
+      e.currentTarget.style.borderColor = level.color;
+      e.currentTarget.style.transform = "scale(1.02)";
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.borderColor = T.border;
+      e.currentTarget.style.transform = "scale(1)";
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: level.color,
+      marginRight: 8
+    }
+  }, "ABC"[i], ")"), o)))));
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // HANDWRITING CANVAS — finger / Apple Pencil drawing
 // ═══════════════════════════════════════════════════════════════════
-function HandwritingCanvas({color,onFirstStroke,canvasRef}) {
-  const isDrawing=useRef(false);
-  const lastPt=useRef(null);
+function HandwritingCanvas({
+  color,
+  onFirstStroke,
+  canvasRef
+}) {
+  const isDrawing = useRef(false);
+  const lastPt = useRef(null);
 
   // Init canvas with ruled lines
-  useEffect(()=>{
-    const t=setTimeout(()=>{
-      const canvas=canvasRef.current;
-      if(!canvas) return;
-      const dpr=window.devicePixelRatio||1;
-      const rect=canvas.getBoundingClientRect();
-      canvas.width=rect.width*dpr;
-      canvas.height=rect.height*dpr;
-      const ctx=canvas.getContext("2d");
-      ctx.scale(dpr,dpr);
-      drawRules(canvas,ctx,color);
-    },80);
-    return()=>clearTimeout(t);
-  },[color]);
-
-  function drawRules(canvas,ctx,c){
-    const w=canvas.getBoundingClientRect().width;
-    const h=canvas.getBoundingClientRect().height;
-    ctx.clearRect(0,0,w,h);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(dpr, dpr);
+      drawRules(canvas, ctx, color);
+    }, 80);
+    return () => clearTimeout(t);
+  }, [color]);
+  function drawRules(canvas, ctx, c) {
+    const w = canvas.getBoundingClientRect().width;
+    const h = canvas.getBoundingClientRect().height;
+    ctx.clearRect(0, 0, w, h);
     // Paper background
-    ctx.fillStyle="#FEFCE8";
-    ctx.fillRect(0,0,w,h);
+    ctx.fillStyle = "#FEFCE8";
+    ctx.fillRect(0, 0, w, h);
     // Left red margin
-    ctx.strokeStyle="#FCA5A5";
-    ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.moveTo(38,0);ctx.lineTo(38,h);ctx.stroke();
+    ctx.strokeStyle = "#FCA5A5";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(38, 0);
+    ctx.lineTo(38, h);
+    ctx.stroke();
     // Ruled lines
-    ctx.strokeStyle="#BFDBFE";
-    ctx.lineWidth=1;
-    const lineH=36;
-    for(let y=lineH;y<h;y+=lineH){
-      ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();
+    ctx.strokeStyle = "#BFDBFE";
+    ctx.lineWidth = 1;
+    const lineH = 36;
+    for (let y = lineH; y < h; y += lineH) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
     }
     // Mid-guide dotted lines
-    ctx.strokeStyle="#E0F2FE";
-    ctx.setLineDash([3,6]);
-    for(let y=lineH*0.5;y<h;y+=lineH){
-      ctx.beginPath();ctx.moveTo(38,y);ctx.lineTo(w,y);ctx.stroke();
+    ctx.strokeStyle = "#E0F2FE";
+    ctx.setLineDash([3, 6]);
+    for (let y = lineH * 0.5; y < h; y += lineH) {
+      ctx.beginPath();
+      ctx.moveTo(38, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
     }
     ctx.setLineDash([]);
   }
-
-  function getPos(e,canvas){
-    const rect=canvas.getBoundingClientRect();
-    const src=e.touches?e.touches[0]:e;
-    return {x:src.clientX-rect.left, y:src.clientY-rect.top};
+  function getPos(e, canvas) {
+    const rect = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return {
+      x: src.clientX - rect.left,
+      y: src.clientY - rect.top
+    };
   }
-
-  function startDraw(e){
+  function startDraw(e) {
     e.preventDefault();
-    const canvas=canvasRef.current;
-    if(!canvas) return;
-    isDrawing.current=true;
-    lastPt.current=getPos(e,canvas);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    isDrawing.current = true;
+    lastPt.current = getPos(e, canvas);
     onFirstStroke();
   }
-
-  function moveDraw(e){
+  function moveDraw(e) {
     e.preventDefault();
-    if(!isDrawing.current) return;
-    const canvas=canvasRef.current;
-    if(!canvas) return;
-    const ctx=canvas.getContext("2d");
-    const pt=getPos(e,canvas);
+    if (!isDrawing.current) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const pt = getPos(e, canvas);
     // Pressure for Apple Pencil
-    const pressure=e.touches&&e.touches[0]&&e.touches[0].force>0?e.touches[0].force:0.5;
-    ctx.strokeStyle="#1E293B";
-    ctx.lineWidth=Math.max(1.5,pressure*5.5);
-    ctx.lineCap="round";
-    ctx.lineJoin="round";
+    const pressure = e.touches && e.touches[0] && e.touches[0].force > 0 ? e.touches[0].force : 0.5;
+    ctx.strokeStyle = "#1E293B";
+    ctx.lineWidth = Math.max(1.5, pressure * 5.5);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
     ctx.beginPath();
-    ctx.moveTo(lastPt.current.x,lastPt.current.y);
-    ctx.lineTo(pt.x,pt.y);
+    ctx.moveTo(lastPt.current.x, lastPt.current.y);
+    ctx.lineTo(pt.x, pt.y);
     ctx.stroke();
-    lastPt.current=pt;
+    lastPt.current = pt;
   }
-
-  function endDraw(e){e.preventDefault();isDrawing.current=false;lastPt.current=null;}
-
-  function clearCanvas(){
-    const canvas=canvasRef.current;
-    if(!canvas) return;
-    const ctx=canvas.getContext("2d");
-    const dpr=window.devicePixelRatio||1;
-    ctx.setTransform(dpr,0,0,dpr,0,0);
-    drawRules(canvas,ctx,color);
+  function endDraw(e) {
+    e.preventDefault();
+    isDrawing.current = false;
+    lastPt.current = null;
   }
-
-  return (
-    <div style={{position:"relative"}}>
-      <canvas
-        ref={canvasRef}
-        style={{width:"100%",height:200,borderRadius:16,border:`3px solid ${color}`,display:"block",touchAction:"none",cursor:"crosshair"}}
-        onMouseDown={startDraw} onMouseMove={moveDraw} onMouseUp={endDraw} onMouseLeave={endDraw}
-        onTouchStart={startDraw} onTouchMove={moveDraw} onTouchEnd={endDraw}
-      />
-      <button onClick={clearCanvas} style={{position:"absolute",top:8,right:8,background:"white",border:`2px solid ${color}`,borderRadius:10,padding:"5px 10px",cursor:"pointer",fontSize:13,fontWeight:900,color:color,fontFamily:FONT_PRINT}}>🗑️ Borrar</button>
-    </div>
-  );
+  function clearCanvas() {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    drawRules(canvas, ctx, color);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "relative"
+    }
+  }, /*#__PURE__*/React.createElement("canvas", {
+    ref: canvasRef,
+    style: {
+      width: "100%",
+      height: 200,
+      borderRadius: 16,
+      border: `3px solid ${color}`,
+      display: "block",
+      touchAction: "none",
+      cursor: "crosshair"
+    },
+    onMouseDown: startDraw,
+    onMouseMove: moveDraw,
+    onMouseUp: endDraw,
+    onMouseLeave: endDraw,
+    onTouchStart: startDraw,
+    onTouchMove: moveDraw,
+    onTouchEnd: endDraw
+  }), /*#__PURE__*/React.createElement("button", {
+    onClick: clearCanvas,
+    style: {
+      position: "absolute",
+      top: 8,
+      right: 8,
+      background: "white",
+      border: `2px solid ${color}`,
+      borderRadius: 10,
+      padding: "5px 10px",
+      cursor: "pointer",
+      fontSize: 13,
+      fontWeight: 900,
+      color: color,
+      fontFamily: FONT_PRINT
+    }
+  }, "\uD83D\uDDD1\uFE0F Borrar"));
 }
 
 // ─── Long-press validation button ────────────────────────────────
-function LongPressBtn({label,color,onSuccess,duration=2000}) {
-  const [pct,setPct]=useState(0);
-  const timerRef=useRef(null);
-  const startRef=useRef(null);
-
-  function start(e){
+function LongPressBtn({
+  label,
+  color,
+  onSuccess,
+  duration = 2000
+}) {
+  const [pct, setPct] = useState(0);
+  const timerRef = useRef(null);
+  const startRef = useRef(null);
+  function start(e) {
     e.preventDefault();
-    startRef.current=Date.now();
-    timerRef.current=setInterval(()=>{
-      const elapsed=Date.now()-startRef.current;
-      const p=Math.min(100,(elapsed/duration)*100);
+    startRef.current = Date.now();
+    timerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startRef.current;
+      const p = Math.min(100, elapsed / duration * 100);
       setPct(p);
-      if(p>=100){clearInterval(timerRef.current);setPct(0);onSuccess();}
-    },30);
+      if (p >= 100) {
+        clearInterval(timerRef.current);
+        setPct(0);
+        onSuccess();
+      }
+    }, 30);
   }
-  function cancel(){
+  function cancel() {
     clearInterval(timerRef.current);
     setPct(0);
   }
-
-  return (
-    <button
-      onMouseDown={start} onMouseUp={cancel} onMouseLeave={cancel}
-      onTouchStart={start} onTouchEnd={cancel}
-      style={{position:"relative",overflow:"hidden",background:color,border:"none",borderRadius:20,padding:"14px 22px",cursor:"pointer",fontSize:15,fontWeight:900,color:"white",fontFamily:FONT_PRINT,minWidth:130,userSelect:"none",WebkitUserSelect:"none"}}
-    >
-      <div style={{position:"absolute",left:0,top:0,height:"100%",width:`${pct}%`,background:"rgba(255,255,255,0.35)",transition:"width 0.03s linear",borderRadius:20}}/>
-      <span style={{position:"relative",zIndex:1}}>{pct>0?"Aguanta…":label}</span>
-    </button>
-  );
+  return /*#__PURE__*/React.createElement("button", {
+    onMouseDown: start,
+    onMouseUp: cancel,
+    onMouseLeave: cancel,
+    onTouchStart: start,
+    onTouchEnd: cancel,
+    style: {
+      position: "relative",
+      overflow: "hidden",
+      background: color,
+      border: "none",
+      borderRadius: 20,
+      padding: "14px 22px",
+      cursor: "pointer",
+      fontSize: 15,
+      fontWeight: 900,
+      color: "white",
+      fontFamily: FONT_PRINT,
+      minWidth: 130,
+      userSelect: "none",
+      WebkitUserSelect: "none"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "absolute",
+      left: 0,
+      top: 0,
+      height: "100%",
+      width: `${pct}%`,
+      background: "rgba(255,255,255,0.35)",
+      transition: "width 0.03s linear",
+      borderRadius: 20
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      position: "relative",
+      zIndex: 1
+    }
+  }, pct > 0 ? "Aguanta…" : label));
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // DICTATION LESSON — handwriting canvas, adult validates with long-press
 // ═══════════════════════════════════════════════════════════════════
-function DictationLesson({level,caseMode,onComplete,onBack}) {
-  const [queue,setQueue]=useState(()=>shuffle(level.dictItems));
-  const [errorMap,setErrorMap]=useState({});
-  const [idx,setIdx]=useState(0);
-  const [phase,setPhase]=useState("listen"); // listen | write
-  const [hasDrawn,setHasDrawn]=useState(false);
-  const [msg,setMsg]=useState("");
-  const [msgType,setMsgType]=useState("");
-  const [conf,setConf]=useState(false);
-  const [spelledOut,setSpelledOut]=useState(false);
-  const canvasRef=useRef();
-  const {speak,cheer,correct:correctSpeak}=useTTS();
-  const item=queue[idx];
-
-  function speakItem(){speak(item.tts,{rate:0.68,jitter:false});}
-
-  function spellOut(){
-    const letters=item.text.split("").join(", ");
-    correctSpeak(`La palabra es: ${item.tts}. Letra a letra: ${letters}. Escríbela.`,{rate:0.78});
+function DictationLesson({
+  level,
+  caseMode,
+  onComplete,
+  onBack
+}) {
+  const [queue, setQueue] = useState(() => shuffle(level.dictItems));
+  const [errorMap, setErrorMap] = useState({});
+  const [idx, setIdx] = useState(0);
+  const [phase, setPhase] = useState("listen"); // listen | write
+  const [hasDrawn, setHasDrawn] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [msgType, setMsgType] = useState("");
+  const [conf, setConf] = useState(false);
+  const [spelledOut, setSpelledOut] = useState(false);
+  const canvasRef = useRef();
+  const {
+    speak,
+    cheer,
+    correct: correctSpeak
+  } = useTTS();
+  const item = queue[idx];
+  function speakItem() {
+    speak(item.tts, {
+      rate: 0.68,
+      jitter: false
+    });
+  }
+  function spellOut() {
+    const letters = item.text.split("").join(", ");
+    correctSpeak(`La palabra es: ${item.tts}. Letra a letra: ${letters}. Escríbela.`, {
+      rate: 0.78
+    });
     setSpelledOut(true);
   }
-
-  function resetCanvas(){
+  function resetCanvas() {
     // trigger clear by remounting canvas — we flip a key
     setHasDrawn(false);
-    const canvas=canvasRef.current;
-    if(!canvas) return;
-    const ctx=canvas.getContext("2d");
-    const dpr=window.devicePixelRatio||1;
-    const w=canvas.getBoundingClientRect().width;
-    const h=canvas.getBoundingClientRect().height;
-    ctx.setTransform(dpr,0,0,dpr,0,0);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.getBoundingClientRect().width;
+    const h = canvas.getBoundingClientRect().height;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // repaint ruled lines
-    ctx.fillStyle="#FEFCE8";ctx.fillRect(0,0,w,h);
-    ctx.strokeStyle="#FCA5A5";ctx.lineWidth=1.5;
-    ctx.beginPath();ctx.moveTo(38,0);ctx.lineTo(38,h);ctx.stroke();
-    ctx.strokeStyle="#BFDBFE";ctx.lineWidth=1;
-    for(let y=36;y<h;y+=36){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
-    ctx.strokeStyle="#E0F2FE";ctx.setLineDash([3,6]);
-    for(let y=18;y<h;y+=36){ctx.beginPath();ctx.moveTo(38,y);ctx.lineTo(w,y);ctx.stroke();}
+    ctx.fillStyle = "#FEFCE8";
+    ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = "#FCA5A5";
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(38, 0);
+    ctx.lineTo(38, h);
+    ctx.stroke();
+    ctx.strokeStyle = "#BFDBFE";
+    ctx.lineWidth = 1;
+    for (let y = 36; y < h; y += 36) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+    ctx.strokeStyle = "#E0F2FE";
+    ctx.setLineDash([3, 6]);
+    for (let y = 18; y < h; y += 36) {
+      ctx.beginPath();
+      ctx.moveTo(38, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
     ctx.setLineDash([]);
   }
-
-  function handleCorrect(){
-    const m=pick(MSG_OK);setMsg(m);setMsgType("ok");setConf(true);
-    cheer(m.replace(/[🌟🎉⭐🏆🚀💥🔥]/g,""));
-    setTimeout(()=>{
-      setConf(false);setMsg("");setPhase("listen");setHasDrawn(false);setSpelledOut(false);
-      if(idx+1>=queue.length) onComplete(3);
-      else setIdx(i=>i+1);
-    },2000);
+  function handleCorrect() {
+    const m = pick(MSG_OK);
+    setMsg(m);
+    setMsgType("ok");
+    setConf(true);
+    cheer(m.replace(/[🌟🎉⭐🏆🚀💥🔥]/g, ""));
+    setTimeout(() => {
+      setConf(false);
+      setMsg("");
+      setPhase("listen");
+      setHasDrawn(false);
+      setSpelledOut(false);
+      if (idx + 1 >= queue.length) onComplete(3);else setIdx(i => i + 1);
+    }, 2000);
   }
-
-  function handleWrong(){
-    const errs=(errorMap[item.text]||0)+1;
-    setErrorMap(m=>({...m,[item.text]:errs}));
-    if(errs>=2){setQueue(q=>[...q,item]);spellOut();}
-    else{correctSpeak(`Inténtalo de nuevo. La pista: ${item.hint.replace(/[^\w\s]/g,"")}`,{rate:0.82});}
-    const m=pick(MSG_FAIL);setMsg(m);setMsgType("fail");
-    setTimeout(()=>{setMsg("");setPhase("listen");setHasDrawn(false);},2200);
+  function handleWrong() {
+    const errs = (errorMap[item.text] || 0) + 1;
+    setErrorMap(m => ({
+      ...m,
+      [item.text]: errs
+    }));
+    if (errs >= 2) {
+      setQueue(q => [...q, item]);
+      spellOut();
+    } else {
+      correctSpeak(`Inténtalo de nuevo. La pista: ${item.hint.replace(/[^\w\s]/g, "")}`, {
+        rate: 0.82
+      });
+    }
+    const m = pick(MSG_FAIL);
+    setMsg(m);
+    setMsgType("fail");
+    setTimeout(() => {
+      setMsg("");
+      setPhase("listen");
+      setHasDrawn(false);
+    }, 2200);
   }
-
-  return (
-    <div style={{padding:16}}>
-      <Confetti active={conf}/>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:14}}>
-        <BackBtn onClick={onBack}/>
-        <div style={{flex:1}}><ProgressBar value={idx} max={queue.length} color={level.color} h={12}/></div>
-        <span style={{fontSize:13,fontWeight:700,color:T.muted,flexShrink:0}}>{idx+1}/{queue.length}</span>
-      </div>
-
-      {/* Hint card */}
-      <Card style={{marginBottom:14,textAlign:"center"}}>
-        <p style={{fontWeight:900,color:"#06B6D4",fontSize:13,marginBottom:6}}>Pista 💡</p>
-        <p style={{color:T.text,fontSize:18,fontWeight:800,fontFamily:FONT_PRINT}}>{item.hint}</p>
-        <div style={{marginTop:14,display:"flex",gap:10,justifyContent:"center",flexWrap:"wrap"}}>
-          <SpeakBtn color={level.color} onPress={speakItem} label="🔊 Escuchar"/>
-          {phase==="listen"&&(
-            <Btn color={level.color} size="sm" onClick={()=>setPhase("write")}>✏️ ¡Escribir!</Btn>
-          )}
-        </div>
-        {spelledOut&&(
-          <p style={{color:"#7C3AED",fontSize:13,fontWeight:800,marginTop:8}}>
-            🔤 Letra a letra: <strong>{item.text.split("").join(" — ")}</strong>
-          </p>
-        )}
-      </Card>
-
-      {/* Listen phase — dashes */}
-      {phase==="listen"&&(
-        <div style={{background:"#FFF7ED",border:`3px dashed ${level.color}`,borderRadius:22,padding:26,textAlign:"center"}}>
-          <p style={{color:T.muted,fontSize:13,marginBottom:10}}>Escucha la palabra y pulsa ✏️ para escribirla con el dedo</p>
-          <div style={{fontSize:28,fontWeight:900,color:level.color+"88",letterSpacing:12}}>
-            {"_ ".repeat(item.text.replace(/ /g,"").length).trim()}
-          </div>
-        </div>
-      )}
-
-      {/* Write phase — canvas */}
-      {phase==="write"&&(
-        <div>
-          <p style={{fontSize:13,color:T.muted,fontWeight:700,textAlign:"center",marginBottom:8}}>
-            ✍️ Escribe con el dedo o el lápiz digital
-          </p>
-          <HandwritingCanvas
-            color={level.color}
-            canvasRef={canvasRef}
-            onFirstStroke={()=>setHasDrawn(true)}
-          />
-
-          <FeedbackBanner msg={msg} type={msgType}/>
-
-          {/* Adult validation — only shows after child has drawn */}
-          {hasDrawn&&!msg&&(
-            <div style={{marginTop:14,background:"#F0FDF4",border:"2px solid #86EFAC",borderRadius:20,padding:"14px 16px"}}>
-              <p style={{textAlign:"center",fontSize:12,color:"#166534",fontWeight:800,marginBottom:4}}>
-                👨‍👩‍👧 ADULTO — ¿está bien escrito?
-              </p>
-              <p style={{textAlign:"center",fontSize:15,color:"#15803D",fontWeight:900,marginBottom:12,fontFamily:FONT_PRINT,letterSpacing:4}}>
-                ✅ {item.text}
-              </p>
-              <p style={{textAlign:"center",fontSize:11,color:"#4ADE80",fontWeight:700,marginBottom:10}}>
-                Mantén pulsado 2 segundos para validar
-              </p>
-              <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-                <LongPressBtn label="❌ No" color="#EF4444" onSuccess={handleWrong}/>
-                <LongPressBtn label="✅ ¡Sí!" color="#22C55E" onSuccess={handleCorrect}/>
-              </div>
-            </div>
-          )}
-
-          {!hasDrawn&&(
-            <p style={{textAlign:"center",color:T.muted,fontSize:13,marginTop:12,fontWeight:700}}>
-              ✍️ Dibuja la palabra en el recuadro de arriba
-            </p>
-          )}
-
-          {/* Re-listen button while writing */}
-          <div style={{textAlign:"center",marginTop:12}}>
-            <SpeakBtn color={T.muted} onPress={speakItem} label="🔊 Escuchar otra vez"/>
-          </div>
-        </div>
-      )}
-    </div>
-  );
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 16
+    }
+  }, /*#__PURE__*/React.createElement(Confetti, {
+    active: conf
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 10,
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement(BackBtn, {
+    onClick: onBack
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1
+    }
+  }, /*#__PURE__*/React.createElement(ProgressBar, {
+    value: idx,
+    max: queue.length,
+    color: level.color,
+    h: 12
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      fontWeight: 700,
+      color: T.muted,
+      flexShrink: 0
+    }
+  }, idx + 1, "/", queue.length)), /*#__PURE__*/React.createElement(Card, {
+    style: {
+      marginBottom: 14,
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontWeight: 900,
+      color: "#06B6D4",
+      fontSize: 13,
+      marginBottom: 6
+    }
+  }, "Pista \uD83D\uDCA1"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: T.text,
+      fontSize: 18,
+      fontWeight: 800,
+      fontFamily: FONT_PRINT
+    }
+  }, item.hint), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 14,
+      display: "flex",
+      gap: 10,
+      justifyContent: "center",
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement(SpeakBtn, {
+    color: level.color,
+    onPress: speakItem,
+    label: "\uD83D\uDD0A Escuchar"
+  }), phase === "listen" && /*#__PURE__*/React.createElement(Btn, {
+    color: level.color,
+    size: "sm",
+    onClick: () => setPhase("write")
+  }, "\u270F\uFE0F \xA1Escribir!")), spelledOut && /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: "#7C3AED",
+      fontSize: 13,
+      fontWeight: 800,
+      marginTop: 8
+    }
+  }, "\uD83D\uDD24 Letra a letra: ", /*#__PURE__*/React.createElement("strong", null, item.text.split("").join(" — ")))), phase === "listen" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "#FFF7ED",
+      border: `3px dashed ${level.color}`,
+      borderRadius: 22,
+      padding: 26,
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: T.muted,
+      fontSize: 13,
+      marginBottom: 10
+    }
+  }, "Escucha la palabra y pulsa \u270F\uFE0F para escribirla con el dedo"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 28,
+      fontWeight: 900,
+      color: level.color + "88",
+      letterSpacing: 12
+    }
+  }, "_ ".repeat(item.text.replace(/ /g, "").length).trim())), phase === "write" && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: T.muted,
+      fontWeight: 700,
+      textAlign: "center",
+      marginBottom: 8
+    }
+  }, "\u270D\uFE0F Escribe con el dedo o el l\xE1piz digital"), /*#__PURE__*/React.createElement(HandwritingCanvas, {
+    color: level.color,
+    canvasRef: canvasRef,
+    onFirstStroke: () => setHasDrawn(true)
+  }), /*#__PURE__*/React.createElement(FeedbackBanner, {
+    msg: msg,
+    type: msgType
+  }), hasDrawn && !msg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 14,
+      background: "#F0FDF4",
+      border: "2px solid #86EFAC",
+      borderRadius: 20,
+      padding: "14px 16px"
+    }
+  }, /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: "center",
+      fontSize: 12,
+      color: "#166534",
+      fontWeight: 800,
+      marginBottom: 4
+    }
+  }, "\uD83D\uDC68\u200D\uD83D\uDC69\u200D\uD83D\uDC67 ADULTO \u2014 \xBFest\xE1 bien escrito?"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: "center",
+      fontSize: 15,
+      color: "#15803D",
+      fontWeight: 900,
+      marginBottom: 12,
+      fontFamily: FONT_PRINT,
+      letterSpacing: 4
+    }
+  }, "\u2705 ", item.text), /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: "center",
+      fontSize: 11,
+      color: "#4ADE80",
+      fontWeight: 700,
+      marginBottom: 10
+    }
+  }, "Mant\xE9n pulsado 2 segundos para validar"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement(LongPressBtn, {
+    label: "\u274C No",
+    color: "#EF4444",
+    onSuccess: handleWrong
+  }), /*#__PURE__*/React.createElement(LongPressBtn, {
+    label: "\u2705 \xA1S\xED!",
+    color: "#22C55E",
+    onSuccess: handleCorrect
+  }))), !hasDrawn && /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: "center",
+      color: T.muted,
+      fontSize: 13,
+      marginTop: 12,
+      fontWeight: 700
+    }
+  }, "\u270D\uFE0F Dibuja la palabra en el recuadro de arriba"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement(SpeakBtn, {
+    color: T.muted,
+    onPress: speakItem,
+    label: "\uD83D\uDD0A Escuchar otra vez"
+  }))));
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // LEVEL COMPLETE
 // ═══════════════════════════════════════════════════════════════════
-function LevelComplete({level,stars,onContinue}) {
-  const {cheer}=useTTS();
-  useEffect(()=>{
-    const msg=stars===3?"¡Nivel completado, campeón! ¡Tres estrellas! ¡Eres increíble!":stars===2?"¡Muy bien hecho! ¡Dos estrellas!":"¡Lo has conseguido! ¡Sigue practicando!";
-    setTimeout(()=>cheer(msg,{rate:0.90}),400);
-  },[]);
-  return (
-    <div style={{padding:32,textAlign:"center",minHeight:"60vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
-      <Confetti active/>
-      <div style={{width:100,height:100,borderRadius:"50%",margin:"0 auto 20px",background:`linear-gradient(135deg,${level.color},${level.color}99)`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:52,boxShadow:`0 8px 32px ${level.color}55`}}>{level.icon}</div>
-      <h2 style={{color:T.text,fontSize:26,fontWeight:900,marginBottom:6,fontFamily:FONT_PRINT}}>¡Nivel completado!</h2>
-      <p style={{color:T.muted,fontSize:16,marginBottom:20,fontFamily:FONT_PRINT}}>{level.title}</p>
-      <Stars count={stars} size={38}/>
-      <div style={{marginTop:20,fontSize:14,color:T.muted,fontWeight:700,fontFamily:FONT_PRINT}}>
-        {stars===3?"¡Perfecto! ¡Eres un campeón! 🏆":stars===2?"¡Muy bien! Practica más para 3 estrellas ⭐":"¡Lo has conseguido! ¡Sigue así! 💪"}
-      </div>
-      <div style={{marginTop:28}}><Btn color={level.color} size="lg" onClick={onContinue}>🗺️ Volver al mapa</Btn></div>
-    </div>
-  );
+function LevelComplete({
+  level,
+  stars,
+  onContinue
+}) {
+  const {
+    cheer
+  } = useTTS();
+  useEffect(() => {
+    const msg = stars === 3 ? "¡Nivel completado, campeón! ¡Tres estrellas! ¡Eres increíble!" : stars === 2 ? "¡Muy bien hecho! ¡Dos estrellas!" : "¡Lo has conseguido! ¡Sigue practicando!";
+    setTimeout(() => cheer(msg, {
+      rate: 0.90
+    }), 400);
+  }, []);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 32,
+      textAlign: "center",
+      minHeight: "60vh",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement(Confetti, {
+    active: true
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 100,
+      height: 100,
+      borderRadius: "50%",
+      margin: "0 auto 20px",
+      background: `linear-gradient(135deg,${level.color},${level.color}99)`,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      fontSize: 52,
+      boxShadow: `0 8px 32px ${level.color}55`
+    }
+  }, level.icon), /*#__PURE__*/React.createElement("h2", {
+    style: {
+      color: T.text,
+      fontSize: 26,
+      fontWeight: 900,
+      marginBottom: 6,
+      fontFamily: FONT_PRINT
+    }
+  }, "\xA1Nivel completado!"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: T.muted,
+      fontSize: 16,
+      marginBottom: 20,
+      fontFamily: FONT_PRINT
+    }
+  }, level.title), /*#__PURE__*/React.createElement(Stars, {
+    count: stars,
+    size: 38
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 20,
+      fontSize: 14,
+      color: T.muted,
+      fontWeight: 700,
+      fontFamily: FONT_PRINT
+    }
+  }, stars === 3 ? "¡Perfecto! ¡Eres un campeón! 🏆" : stars === 2 ? "¡Muy bien! Practica más para 3 estrellas ⭐" : "¡Lo has conseguido! ¡Sigue así! 💪"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 28
+    }
+  }, /*#__PURE__*/React.createElement(Btn, {
+    color: level.color,
+    size: "lg",
+    onClick: onContinue
+  }, "\uD83D\uDDFA\uFE0F Volver al mapa")));
 }
 
 // ═══════════════════════════════════════════════════════════════════
 // PROFILE
 // ═══════════════════════════════════════════════════════════════════
-function ProfileScreen({store,onReset}) {
-  const done=store.completed.length;
-  const badges=[
-    {icon:"🌱",label:"Primer nivel",     earned:done>=1},
-    {icon:"📖",label:"Lector",           earned:done>=4},
-    {icon:"🔠",label:"Trisílabas",       earned:store.completed.includes(3)||store.completed.includes(6)},
-    {icon:"🔄",label:"Sílabas inversas", earned:store.completed.includes(10)},
-    {icon:"⚙️",label:"Trabadas",         earned:store.completed.includes(12)},
-    {icon:"💬",label:"Frasista",         earned:store.completed.includes(14)},
-    {icon:"📰",label:"Comprensión",      earned:store.completed.includes(15)},
-    {icon:"🏆",label:"Campeón total",    earned:done>=LEVELS.length},
-  ];
-  return (
-    <div style={{padding:"20px 14px 40px"}}>
-      <h2 style={{fontWeight:900,color:T.text,fontSize:22,marginBottom:4,fontFamily:FONT_PRINT}}>Mi progreso ⭐</h2>
-      <p style={{color:T.muted,fontSize:14,marginBottom:20}}>¡Mira todo lo que has aprendido!</p>
-      <Card style={{marginBottom:14}}>
-        <div style={{display:"flex",justifyContent:"space-between",marginBottom:8}}>
-          <span style={{fontWeight:900,color:T.text,fontSize:14}}>Niveles completados</span>
-          <span style={{fontWeight:900,color:"#06B6D4"}}>{done}/{LEVELS.length}</span>
-        </div>
-        <ProgressBar value={done} max={LEVELS.length} color="#06B6D4" h={18}/>
-        <p style={{textAlign:"center",marginTop:8,color:T.muted,fontSize:13,fontWeight:700}}>{Math.round((done/LEVELS.length)*100)}% del camino recorrido 🚀</p>
-      </Card>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
-        <Card style={{textAlign:"center",padding:"16px 10px"}}>
-          <div style={{fontSize:30}}>⭐</div>
-          <div style={{fontWeight:900,fontSize:22,color:"#F59E0B"}}>{store.stars}</div>
-          <div style={{fontSize:12,color:T.muted}}>Estrellas</div>
-        </Card>
-        <Card style={{textAlign:"center",padding:"16px 10px"}}>
-          <div style={{fontSize:30}}>🔤</div>
-          <div style={{fontWeight:900,fontSize:14,color:"#8B5CF6",marginTop:4}}>{store.caseMode==="lower"?"Cursiva escolar":"Imprenta"}</div>
-          <div style={{fontSize:12,color:T.muted}}>Letra actual</div>
-        </Card>
-      </div>
-      <h3 style={{fontWeight:900,color:T.text,marginBottom:12,fontSize:16,fontFamily:FONT_PRINT}}>Mis medallas 🏅</h3>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:24}}>
-        {badges.map((b,i)=>(
-          <div key={i} style={{background:b.earned?"linear-gradient(135deg,#FEF9C3,#FEF3C7)":"#F8F8F8",border:`2px solid ${b.earned?"#FBBF24":T.border}`,borderRadius:18,padding:"14px 12px",textAlign:"center",opacity:b.earned?1:0.4}}>
-            <div style={{fontSize:26}}>{b.earned?b.icon:"🔒"}</div>
-            <div style={{fontSize:12,fontWeight:800,color:b.earned?T.text:T.muted,marginTop:4,fontFamily:FONT_PRINT}}>{b.label}</div>
-          </div>
-        ))}
-      </div>
-      <h3 style={{fontWeight:900,color:T.text,marginBottom:12,fontSize:16,fontFamily:FONT_PRINT}}>Por nivel</h3>
-      {LEVELS.map(l=>{
-        const s=store.starsPerLevel[l.id]||0;const unl=store.unlocked.includes(l.id);
-        return (
-          <div key={l.id} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",borderRadius:14,marginBottom:8,background:store.completed.includes(l.id)?`${l.color}10`:T.bg,opacity:unl?1:0.4}}>
-            <span style={{fontSize:20}}>{unl?l.icon:"🔒"}</span>
-            <div style={{flex:1,fontWeight:800,fontSize:13,color:T.text,fontFamily:FONT_PRINT}}>Nivel {l.id} · {l.title}</div>
-            <Stars count={s} size={15}/>
-          </div>
-        );
-      })}
-      <div style={{textAlign:"center",marginTop:24}}>
-        <button onClick={()=>{if(window.confirm("¿Borrar todo el progreso?"))onReset();}} style={{background:"none",border:"2px solid #EF4444",color:"#EF4444",borderRadius:14,padding:"10px 24px",cursor:"pointer",fontFamily:FONT_PRINT,fontWeight:800,fontSize:14}}>🗑️ Reiniciar progreso</button>
-      </div>
-    </div>
-  );
+function SyncCard({
+  store
+}) {
+  const SB_URL = "https://ydtbmbivkvhbmluhkobx.supabase.co";
+  const SB_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkdGJtYml2a3ZoYm1sdWhrb2J4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2NDQxNzksImV4cCI6MjA5NTIyMDE3OX0.6U0v3tGHwAKueqxr_OCs3o8fu_GPuewgbHaGubhotDs";
+  const PIN = "2018";
+  const [fase, setFase] = React.useState("menu");
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState("");
+  function exportar() {
+    setLoading(true);
+    setError("");
+    const datos = {
+      stars: store.stars,
+      completed: store.completed,
+      starsPerLevel: store.starsPerLevel,
+      caseMode: store.caseMode,
+      unlocked: store.unlocked
+    };
+    fetch(SB_URL + '/rest/v1/progreso', {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify({
+        codigo: PIN,
+        datos: datos,
+        actualizado_at: new Date().toISOString()
+      })
+    }).then(r => {
+      setLoading(false);
+      if (r.ok || r.status === 201 || r.status === 200 || r.status === 409) {
+        setFase("exportado");
+      } else {
+        setError("Error al guardar. Comprueba tu conexión.");
+      }
+    }).catch(() => {
+      setLoading(false);
+      setError("Sin conexión a internet.");
+    });
+  }
+  function importar() {
+    setLoading(true);
+    setError("");
+    fetch(SB_URL + '/rest/v1/progreso?codigo=eq.' + PIN + '&select=datos', {
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY
+      }
+    }).then(r => r.json()).then(data => {
+      setLoading(false);
+      if (data && data[0] && data[0].datos) {
+        const datos = data[0].datos;
+        const current = JSON.parse(localStorage.getItem("leo_v6") || "{}");
+        const allCompleted = [...new Set([...(current.completed || []), ...(datos.completed || [])])];
+        const unlocked = [1];
+        allCompleted.forEach(id => {
+          if (!unlocked.includes(id + 1)) unlocked.push(id + 1);
+        });
+        const merged = {
+          stars: Math.max(current.stars || 0, datos.stars || 0),
+          completed: allCompleted,
+          starsPerLevel: Object.assign({}, current.starsPerLevel || {}, datos.starsPerLevel || {}),
+          caseMode: datos.caseMode || current.caseMode || "upper",
+          unlocked
+        };
+        localStorage.setItem("leo_v6", JSON.stringify(merged));
+        alert("✅ ¡Progreso sincronizado! La app se va a recargar.");
+        window.location.reload();
+      } else {
+        setError("No hay progreso guardado aún. Primero exporta desde el otro dispositivo.");
+      }
+    }).catch(() => {
+      setLoading(false);
+      setError("Sin conexión a internet.");
+    });
+  }
+  return React.createElement(Card, {
+    style: {
+      marginTop: 16,
+      marginBottom: 8
+    }
+  }, React.createElement("p", {
+    style: {
+      fontWeight: 900,
+      color: T.text,
+      fontSize: 15,
+      marginBottom: 6,
+      fontFamily: FONT_PRINT
+    }
+  }, "📲 Sincronizar entre dispositivos"), fase === "menu" && React.createElement("div", null, React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: T.muted,
+      marginBottom: 14
+    }
+  }, "Para tener el mismo progreso en iPhone e iPad, primero exporta en un dispositivo y luego importa en el otro usando el código 2018."), React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      justifyContent: "center",
+      flexWrap: "wrap"
+    }
+  }, React.createElement("button", {
+    onClick: exportar,
+    style: {
+      background: "#06B6D4",
+      color: "white",
+      border: "none",
+      borderRadius: 14,
+      padding: "12px 20px",
+      cursor: "pointer",
+      fontFamily: FONT_PRINT,
+      fontWeight: 800,
+      fontSize: 15
+    }
+  }, "📤 Exportar"), React.createElement("button", {
+    onClick: importar,
+    style: {
+      background: "#8B5CF6",
+      color: "white",
+      border: "none",
+      borderRadius: 14,
+      padding: "12px 20px",
+      cursor: "pointer",
+      fontFamily: FONT_PRINT,
+      fontWeight: 800,
+      fontSize: 15
+    }
+  }, "📥 Importar"))), fase === "exportado" && React.createElement("div", {
+    style: {
+      textAlign: "center"
+    }
+  }, React.createElement("div", {
+    style: {
+      fontSize: 48,
+      marginBottom: 8
+    }
+  }, "✅"), React.createElement("p", {
+    style: {
+      fontWeight: 900,
+      fontSize: 16,
+      color: "#166534",
+      marginBottom: 4
+    }
+  }, "¡Progreso guardado!"), React.createElement("p", {
+    style: {
+      fontSize: 13,
+      color: T.muted,
+      marginBottom: 8
+    }
+  }, "Ahora ve al otro dispositivo → Mi progreso → Importar"), React.createElement("div", {
+    style: {
+      background: "#F0FDF4",
+      border: "3px solid #22C55E",
+      borderRadius: 18,
+      padding: "16px 24px",
+      display: "inline-block",
+      marginBottom: 12
+    }
+  }, React.createElement("p", {
+    style: {
+      fontSize: 12,
+      color: T.muted,
+      marginBottom: 4
+    }
+  }, "Código"), React.createElement("p", {
+    style: {
+      fontSize: 48,
+      fontWeight: 900,
+      color: "#06B6D4",
+      letterSpacing: 8,
+      fontFamily: FONT_PRINT
+    }
+  }, "2018")), React.createElement("br", null), React.createElement("button", {
+    onClick: () => setFase("menu"),
+    style: {
+      background: T.bg,
+      border: "2px solid " + T.border,
+      borderRadius: 12,
+      padding: "8px 16px",
+      cursor: "pointer",
+      fontFamily: FONT_PRINT,
+      fontWeight: 800,
+      fontSize: 13,
+      color: T.muted,
+      marginTop: 8
+    }
+  }, "← Volver")), fase === "menu" && loading && React.createElement("p", {
+    style: {
+      color: "#06B6D4",
+      fontSize: 14,
+      fontWeight: 800,
+      textAlign: "center",
+      marginTop: 8
+    }
+  }, "⏳ Conectando…"));
+}
+function ProfileScreen({
+  store,
+  onReset
+}) {
+  const done = store.completed.length;
+  const badges = [{
+    icon: "🌱",
+    label: "Primer nivel",
+    earned: done >= 1
+  }, {
+    icon: "📖",
+    label: "Lector",
+    earned: done >= 4
+  }, {
+    icon: "🔠",
+    label: "Trisílabas",
+    earned: store.completed.includes(3) || store.completed.includes(6)
+  }, {
+    icon: "🔄",
+    label: "Sílabas inversas",
+    earned: store.completed.includes(10)
+  }, {
+    icon: "⚙️",
+    label: "Trabadas",
+    earned: store.completed.includes(12)
+  }, {
+    icon: "💬",
+    label: "Frasista",
+    earned: store.completed.includes(14)
+  }, {
+    icon: "📰",
+    label: "Comprensión",
+    earned: store.completed.includes(15)
+  }, {
+    icon: "🏆",
+    label: "Campeón total",
+    earned: done >= LEVELS.length
+  }];
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: "20px 14px 40px"
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    style: {
+      fontWeight: 900,
+      color: T.text,
+      fontSize: 22,
+      marginBottom: 4,
+      fontFamily: FONT_PRINT
+    }
+  }, "Mi progreso \u2B50"), /*#__PURE__*/React.createElement("p", {
+    style: {
+      color: T.muted,
+      fontSize: 14,
+      marginBottom: 20
+    }
+  }, "\xA1Mira todo lo que has aprendido!"), /*#__PURE__*/React.createElement(Card, {
+    style: {
+      marginBottom: 14
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 900,
+      color: T.text,
+      fontSize: 14
+    }
+  }, "Niveles completados"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontWeight: 900,
+      color: "#06B6D4"
+    }
+  }, done, "/", LEVELS.length)), /*#__PURE__*/React.createElement(ProgressBar, {
+    value: done,
+    max: LEVELS.length,
+    color: "#06B6D4",
+    h: 18
+  }), /*#__PURE__*/React.createElement("p", {
+    style: {
+      textAlign: "center",
+      marginTop: 8,
+      color: T.muted,
+      fontSize: 13,
+      fontWeight: 700
+    }
+  }, Math.round(done / LEVELS.length * 100), "% del camino recorrido \uD83D\uDE80")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 12,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement(Card, {
+    style: {
+      textAlign: "center",
+      padding: "16px 10px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 30
+    }
+  }, "\u2B50"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 900,
+      fontSize: 22,
+      color: "#F59E0B"
+    }
+  }, store.stars), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: T.muted
+    }
+  }, "Estrellas")), /*#__PURE__*/React.createElement(Card, {
+    style: {
+      textAlign: "center",
+      padding: "16px 10px"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 30
+    }
+  }, "\uD83D\uDD24"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 900,
+      fontSize: 14,
+      color: "#8B5CF6",
+      marginTop: 4
+    }
+  }, store.caseMode === "lower" ? "Cursiva escolar" : "Imprenta"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: T.muted
+    }
+  }, "Letra actual"))), /*#__PURE__*/React.createElement("h3", {
+    style: {
+      fontWeight: 900,
+      color: T.text,
+      marginBottom: 12,
+      fontSize: 16,
+      fontFamily: FONT_PRINT
+    }
+  }, "Mis medallas \uD83C\uDFC5"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "1fr 1fr",
+      gap: 10,
+      marginBottom: 24
+    }
+  }, badges.map((b, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      background: b.earned ? "linear-gradient(135deg,#FEF9C3,#FEF3C7)" : "#F8F8F8",
+      border: `2px solid ${b.earned ? "#FBBF24" : T.border}`,
+      borderRadius: 18,
+      padding: "14px 12px",
+      textAlign: "center",
+      opacity: b.earned ? 1 : 0.4
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 26
+    }
+  }, b.earned ? b.icon : "🔒"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      fontWeight: 800,
+      color: b.earned ? T.text : T.muted,
+      marginTop: 4,
+      fontFamily: FONT_PRINT
+    }
+  }, b.label)))), /*#__PURE__*/React.createElement("h3", {
+    style: {
+      fontWeight: 900,
+      color: T.text,
+      marginBottom: 12,
+      fontSize: 16,
+      fontFamily: FONT_PRINT
+    }
+  }, "Por nivel"), LEVELS.map(l => {
+    const s = store.starsPerLevel[l.id] || 0;
+    const unl = store.unlocked.includes(l.id);
+    return /*#__PURE__*/React.createElement("div", {
+      key: l.id,
+      style: {
+        display: "flex",
+        alignItems: "center",
+        gap: 12,
+        padding: "10px 14px",
+        borderRadius: 14,
+        marginBottom: 8,
+        background: store.completed.includes(l.id) ? `${l.color}10` : T.bg,
+        opacity: unl ? 1 : 0.4
+      }
+    }, /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 20
+      }
+    }, unl ? l.icon : "🔒"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        flex: 1,
+        fontWeight: 800,
+        fontSize: 13,
+        color: T.text,
+        fontFamily: FONT_PRINT
+      }
+    }, "Nivel ", l.id, " \xB7 ", l.title), /*#__PURE__*/React.createElement(Stars, {
+      count: s,
+      size: 15
+    }));
+  }), /*#__PURE__*/React.createElement(SyncCard, {
+    store: store
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: "center",
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      if (window.confirm("¿Borrar todo el progreso?")) onReset();
+    },
+    style: {
+      background: "none",
+      border: "2px solid #EF4444",
+      color: "#EF4444",
+      borderRadius: 14,
+      padding: "10px 24px",
+      cursor: "pointer",
+      fontFamily: FONT_PRINT,
+      fontWeight: 800,
+      fontSize: 14
+    }
+  }, "\uD83D\uDDD1\uFE0F Reiniciar progreso")));
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1535,28 +3886,47 @@ function ProfileScreen({store,onReset}) {
 // ROOT APP
 // ═══════════════════════════════════════════════════════════════════
 function App() {
-  const {store,isUnlocked,completeLevel,addStars,setCaseMode,adminUnlock,clearSessionUnlocks,reset}=useStore();
-  const [screen,setScreen]=useState("map");
-  const [activeId,setActiveId]=useState(null);
-  const [lastStars,setLastStars]=useState(0);
-  const [tab,setTab]=useState("map");
-
-  useEffect(()=>{
-    if(window.speechSynthesis){
+  const {
+    store,
+    isUnlocked,
+    completeLevel,
+    addStars,
+    setCaseMode,
+    adminUnlock,
+    clearSessionUnlocks,
+    reset
+  } = useStore();
+  const [screen, setScreen] = useState("map");
+  const [activeId, setActiveId] = useState(null);
+  const [lastStars, setLastStars] = useState(0);
+  const [tab, setTab] = useState("map");
+  useEffect(() => {
+    if (window.speechSynthesis) {
       window.speechSynthesis.getVoices();
-      window.speechSynthesis.onvoiceschanged=()=>{window.speechSynthesis.getVoices();Speech.pickVoice();};
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+        Speech.pickVoice();
+      };
     }
-  },[]);
-
-  function openLevel(id){setActiveId(id);setScreen("lesson");}
-  function handleComplete(stars){addStars(stars*5);completeLevel(activeId,stars);setLastStars(stars);setScreen("complete");}
+  }, []);
+  function openLevel(id) {
+    setActiveId(id);
+    setScreen("lesson");
+  }
+  function handleComplete(stars) {
+    addStars(stars * 5);
+    completeLevel(activeId, stars);
+    setLastStars(stars);
+    setScreen("complete");
+  }
   // Returning to map: clear session-only admin unlocks so those levels re-lock
-  function goMap(){clearSessionUnlocks();setScreen("map");setTab("map");}
-  const activeLevel=LEVELS.find(l=>l.id===activeId);
-
-  return (
-    <>
-      <style>{`
+  function goMap() {
+    clearSessionUnlocks();
+    setScreen("map");
+    setTab("map");
+  }
+  const activeLevel = LEVELS.find(l => l.id === activeId);
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("style", null, `
         @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&family=Playwrite+ES:wght@100..400&display=swap');
         *{margin:0;padding:0;box-sizing:border-box;}
         body{font-family:${FONT_PRINT};background:${T.bg};}
@@ -1566,50 +3936,153 @@ function App() {
         @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
         ::-webkit-scrollbar{width:6px;}
         ::-webkit-scrollbar-thumb{background:#CBD5E0;border-radius:99px;}
-      `}</style>
-      <div style={{minHeight:"100vh",background:T.bg,fontFamily:FONT_PRINT,display:"flex",flexDirection:"column",maxWidth:580,margin:"0 auto",position:"relative"}}>
-        {screen!=="lesson"&&(
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"13px 20px",background:T.card,boxShadow:"0 2px 14px rgba(0,0,0,0.07)",position:"sticky",top:0,zIndex:100}}>
-            <div style={{display:"flex",alignItems:"center",gap:9}}>
-              <span style={{fontSize:27}}>📚</span>
-              <div>
-                <div style={{fontWeight:900,fontSize:16,color:T.text}}>Leo Campeón</div>
-                <div style={{fontSize:11,color:T.muted}}>¡Aprendemos a leer!</div>
-              </div>
-            </div>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <CaseToggle mode={store.caseMode} onChange={setCaseMode}/>
-              <div style={{display:"flex",alignItems:"center",gap:5,background:"linear-gradient(135deg,#FBBF24,#F97316)",borderRadius:99,padding:"6px 14px",boxShadow:"0 3px 12px #FBBF2444"}}>
-                <span style={{fontSize:17}}>⭐</span>
-                <span style={{fontSize:16,fontWeight:900,color:"white"}}>{store.stars}</span>
-              </div>
-            </div>
-          </div>
-        )}
-        <div style={{flex:1,overflowY:"auto",paddingBottom:screen==="lesson"?16:80}}>
-          {screen==="map"&&tab==="map"     &&<LevelMap store={store} onSelect={openLevel} onCaseChange={setCaseMode} onAdminUnlock={adminUnlock} isUnlocked={isUnlocked}/>}
-          {screen==="map"&&tab==="profile" &&<ProfileScreen store={store} onReset={reset}/>}
-          {screen==="lesson"              &&<LessonRouter levelId={activeId} store={store} onComplete={handleComplete} onBack={goMap}/>}
-          {screen==="complete"&&activeLevel&&<LevelComplete level={activeLevel} stars={lastStars} onContinue={goMap}/>}
-        </div>
-        {screen==="map"&&(
-          <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:580,background:T.card,borderTop:`2px solid ${T.border}`,display:"flex",zIndex:100}}>
-            {[{id:"map",label:"Niveles",icon:"🗺️"},{id:"profile",label:"Mi progreso",icon:"🏅"}].map(t=>(
-              <button key={t.id} onClick={()=>setTab(t.id)} style={{flex:1,background:"none",border:"none",cursor:"pointer",padding:"12px 0",fontFamily:FONT_PRINT,display:"flex",flexDirection:"column",alignItems:"center",gap:3,borderTop:`3px solid ${tab===t.id?"#06B6D4":"transparent"}`}}>
-                <span style={{fontSize:22}}>{t.icon}</span>
-                <span style={{fontSize:11,fontWeight:900,color:tab===t.id?"#06B6D4":T.muted}}>{t.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </>
-  );
+      `), /*#__PURE__*/React.createElement("div", {
+    style: {
+      minHeight: "100vh",
+      background: T.bg,
+      fontFamily: FONT_PRINT,
+      display: "flex",
+      flexDirection: "column",
+      maxWidth: 580,
+      margin: "0 auto",
+      position: "relative"
+    }
+  }, screen !== "lesson" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      padding: "13px 20px",
+      background: T.card,
+      boxShadow: "0 2px 14px rgba(0,0,0,0.07)",
+      position: "sticky",
+      top: 0,
+      zIndex: 100
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 9
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 27
+    }
+  }, "\uD83D\uDCDA"), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontWeight: 900,
+      fontSize: 16,
+      color: T.text
+    }
+  }, "Leo Campe\xF3n"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: T.muted
+    }
+  }, "\xA1Aprendemos a leer!"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement(CaseToggle, {
+    mode: store.caseMode,
+    onChange: setCaseMode
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 5,
+      background: "linear-gradient(135deg,#FBBF24,#F97316)",
+      borderRadius: 99,
+      padding: "6px 14px",
+      boxShadow: "0 3px 12px #FBBF2444"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 17
+    }
+  }, "\u2B50"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 16,
+      fontWeight: 900,
+      color: "white"
+    }
+  }, store.stars)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      overflowY: "auto",
+      paddingBottom: screen === "lesson" ? 16 : 80
+    }
+  }, screen === "map" && tab === "map" && /*#__PURE__*/React.createElement(LevelMap, {
+    store: store,
+    onSelect: openLevel,
+    onCaseChange: setCaseMode,
+    onAdminUnlock: adminUnlock,
+    isUnlocked: isUnlocked
+  }), screen === "map" && tab === "profile" && /*#__PURE__*/React.createElement(ProfileScreen, {
+    store: store,
+    onReset: reset
+  }), screen === "lesson" && /*#__PURE__*/React.createElement(LessonRouter, {
+    levelId: activeId,
+    store: store,
+    onComplete: handleComplete,
+    onBack: goMap
+  }), screen === "complete" && activeLevel && /*#__PURE__*/React.createElement(LevelComplete, {
+    level: activeLevel,
+    stars: lastStars,
+    onContinue: goMap
+  })), screen === "map" && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      bottom: 0,
+      left: "50%",
+      transform: "translateX(-50%)",
+      width: "100%",
+      maxWidth: 580,
+      background: T.card,
+      borderTop: `2px solid ${T.border}`,
+      display: "flex",
+      zIndex: 100
+    }
+  }, [{
+    id: "map",
+    label: "Niveles",
+    icon: "🗺️"
+  }, {
+    id: "profile",
+    label: "Mi progreso",
+    icon: "🏅"
+  }].map(t => /*#__PURE__*/React.createElement("button", {
+    key: t.id,
+    onClick: () => setTab(t.id),
+    style: {
+      flex: 1,
+      background: "none",
+      border: "none",
+      cursor: "pointer",
+      padding: "12px 0",
+      fontFamily: FONT_PRINT,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 3,
+      borderTop: `3px solid ${tab === t.id ? "#06B6D4" : "transparent"}`
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 22
+    }
+  }, t.icon), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      fontWeight: 900,
+      color: tab === t.id ? "#06B6D4" : T.muted
+    }
+  }, t.label))))));
 }
-
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(App));
-  </script>
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
 </body>
 </html>
